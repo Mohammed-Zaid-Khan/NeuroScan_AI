@@ -1,7 +1,13 @@
-"""
-Brain Tumor Classification & Segmentation Web Platform App
-"""
 import os
+
+# Ultra-Low Memory Environment Flags for Server Containers (512MB RAM)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+os.environ['TF_NUM_INTEROP_THREADS'] = '1'
+os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
+os.environ['PYTHONUNBUFFERED'] = '1'
+
 import uuid
 from flask import Flask, render_template, request, jsonify, session, send_from_directory, url_for
 from flask_cors import CORS

@@ -30,9 +30,9 @@ class BrainTumorClassifier:
             except Exception as e:
                 print(f"[WARN] Failed to load model from '{self.model_path}': {e}. Initializing new model.")
 
-        # Build VGG16 architecture with ImageNet weights base
-        print("[INFO] Building VGG16 transfer learning classification model structure...")
-        base_model = VGG16(weights='imagenet', include_top=False, input_shape=self.input_shape)
+        # Build VGG16 architecture fallback without heavy ImageNet download
+        print("[INFO] Building classification model structure...")
+        base_model = VGG16(weights=None, include_top=False, input_shape=self.input_shape)
         
         # Freeze base VGG16 convolutional layers
         for layer in base_model.layers:
