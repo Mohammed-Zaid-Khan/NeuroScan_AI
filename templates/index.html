@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroScan AI | Brain Tumor Classification & Segmentation Workstation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- 0. INITIAL APPLICATION LOADING SCREEN (Shown during auth session check) -->
+  <div id="appLoadingScreen" class="app-loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">
+        <svg class="neuroscan-brand-logo-svg" viewBox="0 0 32 32" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="#2767A8"/>
+          <path d="M16 6C10.5 6 7 9.8 7 14.5C7 18 8.8 21 11.5 23.5V26H20.5V23.5C23.2 21 25 18 25 14.5C25 9.8 21.5 6 16 6Z" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 12H22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+          <path d="M9 16H23" stroke="#64B5F6" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M11 20H21" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+          <circle cx="18.5" cy="14.5" r="2" fill="#168C88" stroke="#FFFFFF" stroke-width="1"/>
+        </svg>
+        <span>NeuroScan <strong class="brand-accent">AI</strong></span>
+      </div>
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading NeuroScan Workstation...</p>
+    </div>
+  </div>
+
+  <!-- PART B: DEDICATED FULL-SCREEN AUTHENTICATION PAGE (Entry screen when not logged in) -->
+  <div id="authPage" class="auth-page-container" style="display: none;">
+    <div class="auth-split-layout">
+      <!-- LEFT BRAND / PRODUCT INFORMATION PANEL (44%) -->
+      <div class="auth-left-brand-panel">
+        <div class="auth-brand-header">
+          <div class="auth-brand-logo">
+            <svg class="neuroscan-brand-logo-svg" viewBox="0 0 32 32" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="8" fill="#2767A8"/>
+              <path d="M16 6C10.5 6 7 9.8 7 14.5C7 18 8.8 21 11.5 23.5V26H20.5V23.5C23.2 21 25 18 25 14.5C25 9.8 21.5 6 16 6Z" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 12H22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+              <path d="M9 16H23" stroke="#64B5F6" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M11 20H21" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+              <circle cx="18.5" cy="14.5" r="2" fill="#168C88" stroke="#FFFFFF" stroke-width="1"/>
+            </svg>
+            <span>NeuroScan <strong class="brand-accent">AI</strong></span>
+          </div>
+        </div>
+
+        <div class="auth-brand-main">
+          <h1 class="auth-brand-headline">AI-Assisted Neuro-Imaging</h1>
+          <h2 class="auth-brand-subheadline">Diagnostic Workspace</h2>
+          <p class="auth-brand-description">
+            MRI classification and pixel-level tumor segmentation powered by VGG16 and U-Net deep neural network architectures.
+          </p>
+
+          <!-- ANIMATED ABSTRACT BRAIN/MRI SCAN GRAPHIC -->
+          <div class="auth-scan-visual-container">
+            <svg class="auth-scan-svg" viewBox="0 0 260 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect width="260" height="160" rx="10" fill="#0D263B" stroke="rgba(255,255,255,0.08)"/>
+              
+              <!-- Abstract Brain Contour -->
+              <path d="M130 25C90 25 65 52 65 88C65 114 80 134 100 145V152H160V145C180 134 195 114 195 88C195 52 170 25 130 25Z" 
+                    stroke="rgba(255,255,255,0.3)" stroke-width="1.8" stroke-dasharray="4 3"/>
+              
+              <!-- Brain Hemisphere Divider & Internal Anatomical Curves -->
+              <path d="M130 30V145" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+              <path d="M95 62C110 57 120 72 130 67" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <path d="M165 62C150 57 140 72 130 67" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <path d="M90 102C105 97 118 112 130 107" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <path d="M170 102C155 97 142 112 130 107" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              
+              <!-- Horizontal Scan Slice Lines -->
+              <line x1="70" y1="58" x2="190" y2="58" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <line x1="65" y1="88" x2="195" y2="88" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <line x1="75" y1="118" x2="185" y2="118" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              
+              <!-- Tumor Segmentation Region (Subtle Opacity Pulse) -->
+              <path class="auth-seg-pulse" d="M148 72C158 72 168 80 164 92C160 104 147 108 138 101C129 94 135 72 148 72Z" 
+                    fill="#168C88" fill-opacity="0.5" stroke="#168C88" stroke-width="1.5"/>
+              
+              <!-- Vertical Moving Scanning Line -->
+              <line class="auth-scan-line" x1="55" y1="35" x2="205" y2="35" stroke="#347CC1" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <div class="auth-capability-list">
+            <div class="capability-item">
+              <div class="capability-badge badge-indigo">VGG16</div>
+              <div class="capability-text">
+                <strong>MRI Classification</strong>
+                <span>4-class tumor probability breakdown</span>
+              </div>
+            </div>
+
+            <div class="capability-item">
+              <div class="capability-badge badge-teal">U-Net</div>
+              <div class="capability-text">
+                <strong>Tumor Segmentation</strong>
+                <span>Pixel-level mask generation & area metrics</span>
+              </div>
+            </div>
+
+            <div class="capability-item">
+              <div class="capability-badge badge-blue">Secure</div>
+              <div class="capability-text">
+                <strong>Protected Diagnostic Workspace</strong>
+                <span>Authenticated session access & audit log logging</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-brand-footer">
+          <span>Clinical Decision Support System v2.4</span>
+        </div>
+      </div>
+
+      <!-- RIGHT AUTHENTICATION FORM PANEL (56%) -->
+      <div class="auth-right-form-panel">
+        <div class="auth-form-wrapper">
+          <div class="auth-form-header">
+            <h2 id="authFormTitle" class="auth-title">Welcome back</h2>
+            <p id="authFormSubtitle" class="auth-subtitle">Sign in to access your diagnostic workspace.</p>
+          </div>
+
+          <!-- SIGN IN / CREATE ACCOUNT SEGMENTED CONTROL -->
+          <div class="auth-tabs-segmented" role="tablist">
+            <button type="button" class="auth-tab-btn active" id="tabSignIn" role="tab" aria-selected="true">Sign In</button>
+            <button type="button" class="auth-tab-btn" id="tabSignUp" role="tab" aria-selected="false">Create Account</button>
+          </div>
+
+          <!-- INLINE AUTH ERROR CONTAINER -->
+          <div id="authErrorBox" class="auth-error-box" style="display: none;" role="alert"></div>
+
+          <!-- AUTHENTICATION FORM -->
+          <form id="authForm" class="auth-form" novalidate>
+            <div id="usernameGroup" class="form-group" style="display: none;">
+              <label for="authUsername" class="form-label">Full Name / Username</label>
+              <input type="text" id="authUsername" class="form-input" placeholder="e.g. Dr. Sapna" autocomplete="name">
+            </div>
+
+            <div id="roleGroup" class="form-group" style="display: none;">
+              <label for="authRole" class="form-label">Professional Role</label>
+              <select id="authRole" class="form-input">
+                <option value="Doctor/Radiologist">Doctor / Radiologist</option>
+                <option value="Researcher/Academic">Researcher / Academic</option>
+                <option value="Medical Student">Medical Student</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="authEmail" class="form-label">Email address</label>
+              <input type="email" id="authEmail" class="form-input" placeholder="doctor@hospital.org" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label for="authPassword" class="form-label">Password</label>
+              <div class="input-password-wrapper">
+                <input type="password" id="authPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                <button type="button" class="btn-toggle-password" id="togglePasswordBtn" aria-label="Show password">
+                  <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-auth-primary" id="authSubmitBtn">
+              <span id="authSubmitText">Sign In to NeuroScan</span>
+            </button>
+          </form>
+
+          <!-- DEMO CREDENTIALS SECONDARY HELPER -->
+          <div class="demo-access-card">
+            <div class="demo-access-header">
+              <span class="demo-access-title">Demo access</span>
+              <span class="demo-access-email">sapna26@gmail.com</span>
+            </div>
+            <button type="button" class="btn-demo-use" id="fillDemoBtn">
+              Use demo account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTECTED APPLICATION SHELL (Shown ONLY when user is authenticated) -->
+  <div id="appShell" class="app-shell-container" style="display: none;">
+
+    <!-- TOP NAVIGATION WORKSTATION HEADER -->
+    <header class="navbar">
+      <div class="nav-left">
+        <div class="nav-brand">
+          <svg class="neuroscan-brand-logo-svg" viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="#2767A8"/>
+            <path d="M16 6C10.5 6 7 9.8 7 14.5C7 18 8.8 21 11.5 23.5V26H20.5V23.5C23.2 21 25 18 25 14.5C25 9.8 21.5 6 16 6Z" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 12H22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+            <path d="M9 16H23" stroke="#64B5F6" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M11 20H21" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+            <circle cx="18.5" cy="14.5" r="2" fill="#168C88" stroke="#FFFFFF" stroke-width="1"/>
+          </svg>
+          <span class="brand-text">NeuroScan <strong class="brand-accent">AI</strong></span>
+        </div>
+        <nav class="nav-links" aria-label="Main Navigation">
+          <button type="button" class="nav-item active" onclick="switchView('workspace')" id="navWorkspace">
+            <i class="fas fa-microscope"></i> <span>Diagnostic Suite</span>
+          </button>
+          <button type="button" class="nav-item" onclick="switchView('analytics')" id="navAnalytics">
+            <i class="fas fa-chart-line"></i> <span>Analytics</span>
+          </button>
+          <button type="button" class="nav-item" onclick="switchView('history')" id="navHistory">
+            <i class="fas fa-database"></i> <span>Audit Log</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="nav-right">
+        <div class="status-badge" title="All ML Inference Engines Operational">
+          <span class="status-dot"></span>
+          <span class="status-text">AI Engines Online</span>
+        </div>
+
+        <div class="profile-dropdown-container">
+          <button type="button" class="profile-btn" id="authBtn" aria-expanded="false" aria-haspopup="true">
+            <span class="avatar-chip" id="navAvatarChip">DS</span>
+            <span class="user-name" id="navUserName">Dr. Sapna</span>
+            <i class="fas fa-chevron-down caret-icon"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN APPLICATION WORKSPACE -->
+    <main class="app-container">
+
+      <!-- DIAGNOSTIC WORKSPACE SECTION -->
+      <section id="workspaceSection" class="view-section">
+
+        <!-- COMPACT WORKSPACE HEADER BAR & AI PIPELINE SELECTOR -->
+        <div class="workspace-header-bar">
+          <div class="workspace-title-block">
+            <div class="workspace-badge-row">
+              <span class="workspace-pill">Diagnostic Suite</span>
+              <span class="workspace-meta">VGG16 Classifier & U-Net Segmenter</span>
+            </div>
+            <h1 class="hero-title">Brain MRI Classification & Segmentation</h1>
+            <p class="hero-subtitle">
+              AI-assisted MRI classification and pixel-level tumor segmentation using VGG16 + U-Net architecture.
+            </p>
+          </div>
+
+          <!-- PIPELINE SELECTOR SEGMENTED CONTROL -->
+          <div class="pipeline-selector-block">
+            <span class="pipeline-selector-label">AI Pipeline</span>
+            <div class="mode-tabs" role="tablist" aria-label="AI Pipeline Selector">
+              <button type="button" class="mode-tab active" data-mode="dual" role="tab" aria-selected="true">
+                <i class="fas fa-layer-group"></i> <span>Dual Pipeline</span>
+              </button>
+              <button type="button" class="mode-tab" data-mode="classify" role="tab" aria-selected="false">
+                <i class="fas fa-tags"></i> <span>Classification · VGG16</span>
+              </button>
+              <button type="button" class="mode-tab" data-mode="segment" role="tab" aria-selected="false">
+                <i class="fas fa-draw-polygon"></i> <span>Segmentation · U-Net</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN DIAGNOSTIC WORKSPACE GRID (2-COLUMN ~36% / ~64%) -->
+        <div class="grid-workspace">
+
+          <!-- LEFT PANEL: MRI INPUT & SCAN CONTROLS -->
+          <div class="workstation-card input-panel-card">
+            <div class="card-header">
+              <div class="header-title">
+                <i class="fas fa-file-medical-alt title-icon"></i>
+                <h2>MRI Input</h2>
+              </div>
+              <span class="format-pill">PNG · JPG · TIF</span>
+            </div>
+
+            <div class="card-body">
+              <!-- UPLOAD DROPZONE EMPTY STATE -->
+              <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload Brain MRI Scan">
+                <div class="dropzone-content">
+                  <div class="dropzone-icon-box">
+                    <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
+                  </div>
+                  <p class="dropzone-primary">Drop brain MRI scan here</p>
+                  <p class="dropzone-secondary"><span class="browse-action-text">Choose a file</span> or drag and drop</p>
+                  <span class="dropzone-formats">PNG, JPG or TIF · Auto-converted when required</span>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none">
+              </div>
+
+              <!-- FILE PREVIEW & SELECTED SCAN METADATA STATE -->
+              <div id="filePreview" class="selected-scan-card" style="display: none">
+                <div class="scan-preview-wrapper">
+                  <img id="previewImg" src="" alt="MRI Scan Preview" class="scan-thumbnail">
+                  <button type="button" class="preview-zoom-btn" id="expandPreviewBtn" title="Inspect Fullsize MRI">
+                    <i class="fas fa-expand"></i>
+                  </button>
+                </div>
+                <div class="scan-meta-details">
+                  <div class="meta-row">
+                    <span class="meta-label">Scan File:</span>
+                    <span class="meta-val" id="scanFilenameVal">mri_brain_scan.png</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">File Size:</span>
+                    <span class="meta-val" id="scanFilesizeVal">248 KB</span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-label">Status:</span>
+                    <span class="meta-val text-success">Loaded & Ready</span>
+                  </div>
+                  <div class="scan-actions">
+                    <button type="button" class="btn-action-subtle" id="replaceFileBtn">
+                      <i class="fas fa-sync-alt"></i> Replace
+                    </button>
+                    <button type="button" class="btn-action-danger" id="removeFileBtn">
+                      <i class="fas fa-trash-alt"></i> Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- REFINED SAMPLE SCANS MODULE -->
+              <div class="sample-scans-panel">
+                <div class="sample-title-row">
+                  <span class="sample-title">Example MRI Scans</span>
+                  <span class="sample-subtitle">Load a sample to test the pipeline</span>
+                </div>
+                <div class="sample-chips-grid">
+                  <button type="button" class="sample-chip" data-sample="glioma">
+                    <i class="fas fa-brain"></i> Glioma
+                  </button>
+                  <button type="button" class="sample-chip" data-sample="meningioma">
+                    <i class="fas fa-brain"></i> Meningioma
+                  </button>
+                  <button type="button" class="sample-chip" data-sample="pituitary">
+                    <i class="fas fa-brain"></i> Pituitary
+                  </button>
+                  <button type="button" class="sample-chip" data-sample="normal">
+                    <i class="fas fa-brain"></i> No Tumor
+                  </button>
+                </div>
+              </div>
+
+              <!-- ANALYZE ACTION BUTTON -->
+              <div class="action-footer">
+                <button type="button" class="btn-primary-workstation" id="analyzeBtn" disabled>
+                  <i class="fas fa-play"></i>
+                  <span id="analyzeBtnText">Run Dual AI Analysis</span>
+                </button>
+                <div id="btnHelperText" class="btn-helper-text">Select an MRI scan to begin.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: DIAGNOSTIC OUTPUT & VISUALIZATIONS -->
+          <div class="workstation-card output-panel-card">
+            <div class="card-header">
+              <div class="header-title">
+                <i class="fas fa-chart-pie title-icon"></i>
+                <h2>Diagnostic Output & Visualizations</h2>
+              </div>
+              <div class="live-inference-badge">
+                <span class="pulse-live"></span>
+                <span>Live inference</span>
+              </div>
+            </div>
+
+            <div class="card-body">
+              
+              <!-- REFINED INITIAL PLACEHOLDER EMPTY STATE -->
+              <div id="placeholderView" class="empty-results-placeholder">
+                <div class="placeholder-icon-box">
+                  <i class="fas fa-microscope"></i>
+                </div>
+                <h3>Ready for analysis</h3>
+                <p>Upload or select an MRI scan, choose an AI pipeline, and run analysis.</p>
+
+                <div class="workflow-steps-row">
+                  <div class="workflow-step">
+                    <span class="step-num">01</span>
+                    <span>MRI Input</span>
+                  </div>
+                  <div class="workflow-step-line"></div>
+                  <div class="workflow-step">
+                    <span class="step-num">02</span>
+                    <span>AI Pipeline</span>
+                  </div>
+                  <div class="workflow-step-line"></div>
+                  <div class="workflow-step">
+                    <span class="step-num">03</span>
+                    <span>Diagnostic Output</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RESULTS SECTION -->
+              <div id="resultsSection" style="display: none">
+                
+                <!-- 3-STAGE MRI VISUALIZATION COMPARISON GRID -->
+                <div class="stage-grid">
+                  <div class="stage-box">
+                    <div class="stage-label">Original MRI</div>
+                    <div class="preview-stage">
+                      <img id="originalScanImg" class="preview-img" src="" alt="Original MRI Scan">
+                    </div>
+                  </div>
+
+                  <div class="stage-box" id="maskStageBox">
+                    <div class="stage-label">Binary Mask (U-Net)</div>
+                    <div class="preview-stage">
+                      <img id="maskScanImg" class="preview-img" src="" alt="U-Net Binary Mask">
+                    </div>
+                  </div>
+
+                  <div class="stage-box" id="overlayStageBox">
+                    <div class="stage-label">Tumor Overlay</div>
+                    <div class="preview-stage">
+                      <img id="overlayScanImg" class="preview-img" src="" alt="Tumor Color Overlay">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- OVERLAY OPACITY BLEND SLIDER -->
+                <div class="opacity-control-bar" id="opacityBarWrapper">
+                  <div class="slider-header">
+                    <span><i class="fas fa-sliders-h"></i> Tumor Overlay Opacity</span>
+                    <span id="opacityValText" class="val-badge">100%</span>
+                  </div>
+                  <input type="range" id="opacitySlider" min="0" max="100" value="100" class="custom-range-slider" aria-label="Tumor Overlay Opacity Blend">
+                </div>
+
+                <!-- DIAGNOSTIC METRIC CARDS -->
+                <div class="result-badge-container">
+                  <div class="metric-card metric-classification" id="classMetricCard">
+                    <span class="metric-label">Predicted Class</span>
+                    <span class="metric-value text-indigo" id="classBadge">--</span>
+                  </div>
+                  <div class="metric-card metric-classification" id="confMetricCard">
+                    <span class="metric-label">Confidence</span>
+                    <span class="metric-value text-indigo" id="confidenceBadge">--</span>
+                  </div>
+                  <div class="metric-card metric-segmentation" id="tumorPctCard">
+                    <span class="metric-label">Tumor Coverage</span>
+                    <span class="metric-value text-teal" id="tumorPctBadge">--</span>
+                  </div>
+                  <div class="metric-card metric-segmentation" id="tumorAreaCard">
+                    <span class="metric-label">Pixel Area</span>
+                    <span class="metric-value text-teal" id="tumorAreaBadge">--</span>
+                  </div>
+                </div>
+
+                <!-- PROBABILITY BREAKDOWN -->
+                <div class="prob-section" id="probSection">
+                  <h3 class="prob-section-title">
+                    <i class="fas fa-chart-bar icon-indigo"></i>
+                    <span>VGG16 Class Probability Breakdown</span>
+                  </h3>
+                  <div id="probBarsContainer" class="prob-bars-container"></div>
+                </div>
+
+                <!-- MODEL TECHNICAL METADATA FOOTNOTE -->
+                <div class="model-footnote">
+                  <span><i class="fas fa-microchip"></i> Architecture: <strong id="modelUsedFootnote">VGG16 Transfer Learning & U-Net Segmentation</strong></span>
+                  <span>Clinical Decision Support System</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ANALYTICS SECTION -->
+      <section id="analyticsSection" class="view-section" style="display: none">
+        <div class="page-banner">
+          <h2><i class="fas fa-chart-line icon-blue"></i> Radiology Clinical Analytics</h2>
+          <p>Real-time aggregate telemetry on scan volumes, classification distributions, and model confidence metrics.</p>
+        </div>
+
+        <div class="analytics-metrics-grid">
+          <div class="stat-card">
+            <i class="fas fa-brain stat-icon icon-blue"></i>
+            <span class="stat-label">Total Scans Processed</span>
+            <span id="statTotalScans" class="stat-val">0</span>
+          </div>
+
+          <div class="stat-card">
+            <i class="fas fa-tags stat-icon icon-indigo"></i>
+            <span class="stat-label">Classifications Logged</span>
+            <span id="statClassifications" class="stat-val text-indigo">0</span>
+          </div>
+
+          <div class="stat-card">
+            <i class="fas fa-draw-polygon stat-icon icon-teal"></i>
+            <span class="stat-label">Segmentations Executed</span>
+            <span id="statSegmentations" class="stat-val text-teal">0</span>
+          </div>
+
+          <div class="stat-card">
+            <i class="fas fa-shield-halved stat-icon text-success"></i>
+            <span class="stat-label">Avg Model Confidence</span>
+            <span id="statAvgConfidence" class="stat-val text-success">0%</span>
+          </div>
+        </div>
+
+        <div class="workstation-card">
+          <div class="card-header">
+            <div class="header-title">
+              <i class="fas fa-chart-pie title-icon"></i>
+              <h2>Tumor Category Distribution Breakdown</h2>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="analyticsClassBars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AUDIT LOG HISTORY SECTION -->
+      <section id="historySection" class="view-section" style="display: none">
+        <div class="page-banner">
+          <h2><i class="fas fa-database icon-blue"></i> Radiology Inspection Audit Log</h2>
+          <p>Persistent audit record tracking processed MRI scans, model predictions, confidence scores, and segmentation parameters.</p>
+        </div>
+
+        <div class="workstation-card">
+          <div class="card-header">
+            <div class="header-title">
+              <i class="fas fa-list-check title-icon"></i>
+              <h2>Patient Scan Audit Records</h2>
+            </div>
+            <button type="button" class="btn-action-subtle" id="refreshHistoryBtn">
+              <i class="fas fa-sync-alt"></i> Refresh Log
+            </button>
+          </div>
+          <div class="card-body" style="padding: 0">
+            <div class="table-responsive">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Record ID</th>
+                    <th>Clinician</th>
+                    <th>MRI Filename</th>
+                    <th>Pipeline</th>
+                    <th>Predicted Class</th>
+                    <th>Confidence</th>
+                    <th>Tumor Area %</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                  <tr>
+                    <td colspan="8" class="table-empty-cell">Loading radiology audit records...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- USER PROFILE / LOGOUT MODAL -->
+  <div class="modal-overlay" id="userProfileModal" aria-hidden="true">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-circle icon-blue"></i> Clinician Profile</h3>
+        <button type="button" class="modal-close" id="closeProfileModal" aria-label="Close modal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="profile-avatar-large" id="profileAvatarLarge">DS</div>
+        <h2 id="profileUsername" class="profile-title">Dr. Sapna</h2>
+        <p id="profileRole" class="profile-role">Doctor / Radiologist</p>
+        <p id="profileEmail" class="profile-email">sapna26@gmail.com</p>
+
+        <button type="button" class="btn-danger-block" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i> Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN IMAGE INSPECTION MODAL -->
+  <div class="modal-overlay" id="imageInspectModal" aria-hidden="true">
+    <div class="modal-card modal-image-view">
+      <div class="modal-header">
+        <h3 id="imageInspectTitle"><i class="fas fa-expand icon-blue"></i> MRI Scan Inspection</h3>
+        <button type="button" class="modal-close" id="closeInspectModal" aria-label="Close inspection view"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="inspectModalImg" src="" alt="Enlarged MRI View" style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px;">
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
