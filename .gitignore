@@ -14,8 +14,14 @@ datasets/
 *.zip
 *.tar.gz
 
-# Local SQLite Database (Optional: keep or ignore)
-# database.db
+# Runtime User Uploads & Segmented Images
+static/uploads/*
+!static/uploads/.gitkeep
+static/segmented/*
+!static/segmented/.gitkeep
+
+# Local SQLite Database
+database.db
 
 # System & IDE Files
 .DS_Store
