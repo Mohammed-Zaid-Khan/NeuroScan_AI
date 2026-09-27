@@ -165,36 +165,42 @@ def api_classify():
     if file.filename == '' or not allowed_file(file.filename):
         return jsonify({'error': 'Invalid image file format. Supported: PNG, JPG, JPEG, TIF.'}), 400
 
-    unique_filename, saved_path = save_scan_file(file)
+    try:
+        unique_filename, saved_path = save_scan_file(file)
 
-    user_id = session.get('user', {}).get('id')
-    upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
+        user_id = session.get('user', {}).get('id')
+        upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
 
-    # Perform VGG16 Preprocessing & Prediction
-    classifier = get_classifier()
-    img_tensor, raw_img = preprocess_for_classification(saved_path)
-    predicted_class, confidence, probabilities = classifier.predict(img_tensor, raw_img)
+        # Perform VGG16 Preprocessing & Prediction
+        classifier = get_classifier()
+        img_tensor, raw_img = preprocess_for_classification(saved_path)
+        predicted_class, confidence, probabilities = classifier.predict(img_tensor, raw_img)
 
-    # Save prediction log to Database
-    pred_id = record_prediction(
-        upload_id=upload_id,
-        model_type='Classification',
-        predicted_class=predicted_class,
-        confidence_score=confidence
-    )
+        # Save prediction log to Database
+        pred_id = record_prediction(
+            upload_id=upload_id,
+            model_type='Classification',
+            predicted_class=predicted_class,
+            confidence_score=confidence
+        )
 
-    log_action(user_id, 'ANALYZE_CLASSIFY', f"Classified scan #{upload_id} as {predicted_class} ({round(confidence*100, 2)}%)")
+        log_action(user_id, 'ANALYZE_CLASSIFY', f"Classified scan #{upload_id} as {predicted_class} ({round(confidence*100, 2)}%)")
 
-    return jsonify({
-        'success': True,
-        'prediction_id': pred_id,
-        'upload_id': upload_id,
-        'original_image_url': f"/static/uploads/{unique_filename}",
-        'predicted_class': predicted_class,
-        'confidence_score': round(confidence * 100, 2),
-        'probabilities': probabilities,
-        'model_used': 'VGG16 Deep CNN (Transfer Learning)'
-    })
+        return jsonify({
+            'success': True,
+            'prediction_id': pred_id,
+            'upload_id': upload_id,
+            'original_image_url': f"/static/uploads/{unique_filename}",
+            'predicted_class': predicted_class,
+            'confidence_score': round(confidence * 100, 2),
+            'probabilities': probabilities,
+            'model_used': 'VGG16 Deep CNN (Transfer Learning)'
+        })
+    except Exception as e:
+        print(f"[ERROR] Classification failed: {e}")
+        return jsonify({'success': False, 'error': f"Classification processing error: {str(e)}"}), 500
+    finally:
+        import gc; gc.collect()
 
 @app.route('/api/analyze/segment', methods=['POST'])
 def api_segment():
@@ -205,51 +211,57 @@ def api_segment():
     if file.filename == '' or not allowed_file(file.filename):
         return jsonify({'error': 'Invalid image file format. Supported: PNG, JPG, JPEG, TIF.'}), 400
 
-    unique_filename, saved_path = save_scan_file(file)
+    try:
+        unique_filename, saved_path = save_scan_file(file)
 
-    user_id = session.get('user', {}).get('id')
-    upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
+        user_id = session.get('user', {}).get('id')
+        upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
 
-    # Preprocess & Predict Mask using U-Net
-    segmenter = get_segmenter()
-    img_tensor, raw_img = preprocess_for_segmentation(saved_path)
-    mask = segmenter.predict_mask(img_tensor, raw_img)
+        # Preprocess & Predict Mask using U-Net
+        segmenter = get_segmenter()
+        img_tensor, raw_img = preprocess_for_segmentation(saved_path)
+        mask = segmenter.predict_mask(img_tensor, raw_img)
 
-    # Save mask & color overlay images
-    overlay_filename = f"overlay_{uuid.uuid4().hex[:10]}.png"
-    overlay_path = os.path.join(Config.SEGMENT_FOLDER, overlay_filename)
-    
-    tumor_pixels, tumor_percentage = generate_color_overlay(saved_path, mask, overlay_path)
+        # Save mask & color overlay images
+        overlay_filename = f"overlay_{uuid.uuid4().hex[:10]}.png"
+        overlay_path = os.path.join(Config.SEGMENT_FOLDER, overlay_filename)
+        
+        tumor_pixels, tumor_percentage = generate_color_overlay(saved_path, mask, overlay_path)
 
-    mask_filename = f"mask_{uuid.uuid4().hex[:10]}.png"
-    mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
-    import cv2
-    cv2.imwrite(mask_path, mask)
+        mask_filename = f"mask_{uuid.uuid4().hex[:10]}.png"
+        mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
+        import cv2
+        cv2.imwrite(mask_path, mask)
 
-    # Record prediction
-    pred_id = record_prediction(
-        upload_id=upload_id,
-        model_type='Segmentation',
-        mask_path=f"static/segmented/{mask_filename}",
-        overlay_path=f"static/segmented/{overlay_filename}",
-        tumor_percentage=tumor_percentage,
-        tumor_area_px=tumor_pixels
-    )
+        # Record prediction
+        pred_id = record_prediction(
+            upload_id=upload_id,
+            model_type='Segmentation',
+            mask_path=f"static/segmented/{mask_filename}",
+            overlay_path=f"static/segmented/{overlay_filename}",
+            tumor_percentage=tumor_percentage,
+            tumor_area_px=tumor_pixels
+        )
 
-    log_action(user_id, 'ANALYZE_SEGMENT', f"Segmented scan #{upload_id}: Tumor area = {tumor_pixels}px ({tumor_percentage}%)")
+        log_action(user_id, 'ANALYZE_SEGMENT', f"Segmented scan #{upload_id}: Tumor area = {tumor_pixels}px ({tumor_percentage}%)")
 
-    return jsonify({
-        'success': True,
-        'prediction_id': pred_id,
-        'upload_id': upload_id,
-        'original_image_url': f"/static/uploads/{unique_filename}",
-        'overlay_image_url': f"/static/segmented/{overlay_filename}",
-        'mask_image_url': f"/static/segmented/{mask_filename}",
-        'tumor_percentage': tumor_percentage,
-        'tumor_area_pixels': tumor_pixels,
-        'has_tumor': tumor_pixels > 0,
-        'model_used': 'U-Net Biomedical Encoder-Decoder'
-    })
+        return jsonify({
+            'success': True,
+            'prediction_id': pred_id,
+            'upload_id': upload_id,
+            'original_image_url': f"/static/uploads/{unique_filename}",
+            'overlay_image_url': f"/static/segmented/{overlay_filename}",
+            'mask_image_url': f"/static/segmented/{mask_filename}",
+            'tumor_percentage': tumor_percentage,
+            'tumor_area_pixels': tumor_pixels,
+            'has_tumor': tumor_pixels > 0,
+            'model_used': 'U-Net Biomedical Encoder-Decoder'
+        })
+    except Exception as e:
+        print(f"[ERROR] Segmentation failed: {e}")
+        return jsonify({'success': False, 'error': f"Segmentation processing error: {str(e)}"}), 500
+    finally:
+        import gc; gc.collect()
 
 @app.route('/api/analyze/dual', methods=['POST'])
 def api_dual_analysis():
@@ -261,59 +273,65 @@ def api_dual_analysis():
     if file.filename == '' or not allowed_file(file.filename):
         return jsonify({'error': 'Invalid image file format. Supported: PNG, JPG, JPEG, TIF.'}), 400
 
-    unique_filename, saved_path = save_scan_file(file)
+    try:
+        unique_filename, saved_path = save_scan_file(file)
 
-    user_id = session.get('user', {}).get('id')
-    upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
+        user_id = session.get('user', {}).get('id')
+        upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
 
-    # 1. Classification (VGG16)
-    classifier = get_classifier()
-    class_tensor, raw_class_img = preprocess_for_classification(saved_path)
-    predicted_class, confidence, probabilities = classifier.predict(class_tensor, raw_class_img)
+        # 1. Classification (VGG16)
+        classifier = get_classifier()
+        class_tensor, raw_class_img = preprocess_for_classification(saved_path)
+        predicted_class, confidence, probabilities = classifier.predict(class_tensor, raw_class_img)
 
-    # 2. Segmentation (U-Net)
-    segmenter = get_segmenter()
-    seg_tensor, raw_seg_img = preprocess_for_segmentation(saved_path)
-    mask = segmenter.predict_mask(seg_tensor, raw_seg_img)
+        # 2. Segmentation (U-Net)
+        segmenter = get_segmenter()
+        seg_tensor, raw_seg_img = preprocess_for_segmentation(saved_path)
+        mask = segmenter.predict_mask(seg_tensor, raw_seg_img)
 
-    overlay_filename = f"overlay_{uuid.uuid4().hex[:10]}.png"
-    overlay_path = os.path.join(Config.SEGMENT_FOLDER, overlay_filename)
-    tumor_pixels, tumor_percentage = generate_color_overlay(saved_path, mask, overlay_path)
+        overlay_filename = f"overlay_{uuid.uuid4().hex[:10]}.png"
+        overlay_path = os.path.join(Config.SEGMENT_FOLDER, overlay_filename)
+        tumor_pixels, tumor_percentage = generate_color_overlay(saved_path, mask, overlay_path)
 
-    mask_filename = f"mask_{uuid.uuid4().hex[:10]}.png"
-    mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
-    import cv2
-    cv2.imwrite(mask_path, mask)
+        mask_filename = f"mask_{uuid.uuid4().hex[:10]}.png"
+        mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
+        import cv2
+        cv2.imwrite(mask_path, mask)
 
-    # Record combined prediction in DB
-    pred_id = record_prediction(
-        upload_id=upload_id,
-        model_type='Dual (Classify & Segment)',
-        predicted_class=predicted_class,
-        confidence_score=confidence,
-        mask_path=f"static/segmented/{mask_filename}",
-        overlay_path=f"static/segmented/{overlay_filename}",
-        tumor_percentage=tumor_percentage,
-        tumor_area_px=tumor_pixels
-    )
+        # Record combined prediction in DB
+        pred_id = record_prediction(
+            upload_id=upload_id,
+            model_type='Dual (Classify & Segment)',
+            predicted_class=predicted_class,
+            confidence_score=confidence,
+            mask_path=f"static/segmented/{mask_filename}",
+            overlay_path=f"static/segmented/{overlay_filename}",
+            tumor_percentage=tumor_percentage,
+            tumor_area_px=tumor_pixels
+        )
 
-    log_action(user_id, 'ANALYZE_DUAL', f"Dual Analysis scan #{upload_id}: {predicted_class} ({round(confidence*100, 2)}%), Area={tumor_pixels}px")
+        log_action(user_id, 'ANALYZE_DUAL', f"Dual Analysis scan #{upload_id}: {predicted_class} ({round(confidence*100, 2)}%), Area={tumor_pixels}px")
 
-    return jsonify({
-        'success': True,
-        'prediction_id': pred_id,
-        'upload_id': upload_id,
-        'original_image_url': f"/static/uploads/{unique_filename}",
-        'overlay_image_url': f"/static/segmented/{overlay_filename}",
-        'mask_image_url': f"/static/segmented/{mask_filename}",
-        'predicted_class': predicted_class,
-        'confidence_score': round(confidence * 100, 2),
-        'probabilities': probabilities,
-        'tumor_percentage': tumor_percentage,
-        'tumor_area_pixels': tumor_pixels,
-        'has_tumor': tumor_pixels > 0 or predicted_class != "No Tumor",
-        'models_used': ['VGG16 Transfer Classifier', 'U-Net Biomedical Segmenter']
-    })
+        return jsonify({
+            'success': True,
+            'prediction_id': pred_id,
+            'upload_id': upload_id,
+            'original_image_url': f"/static/uploads/{unique_filename}",
+            'overlay_image_url': f"/static/segmented/{overlay_filename}",
+            'mask_image_url': f"/static/segmented/{mask_filename}",
+            'predicted_class': predicted_class,
+            'confidence_score': round(confidence * 100, 2),
+            'probabilities': probabilities,
+            'tumor_percentage': tumor_percentage,
+            'tumor_area_pixels': tumor_pixels,
+            'has_tumor': tumor_pixels > 0 or predicted_class != "No Tumor",
+            'models_used': ['VGG16 Transfer Classifier', 'U-Net Biomedical Segmenter']
+        })
+    except Exception as e:
+        print(f"[ERROR] Dual analysis failed: {e}")
+        return jsonify({'success': False, 'error': f"Dual analysis processing error: {str(e)}"}), 500
+    finally:
+        import gc; gc.collect()
 
 # ==========================================
 # HISTORY & ANALYTICS ENDPOINTS

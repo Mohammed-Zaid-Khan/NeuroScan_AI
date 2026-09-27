@@ -546,8 +546,20 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'POST',
           body: formData
         });
-        const data = await res.json();
 
+        if (!res.ok) {
+          let errorMsg = `Server error (${res.status}). Please try again.`;
+          try {
+            const errData = await res.json();
+            if (errData.error || errData.message) errorMsg = errData.error || errData.message;
+          } catch (e) {
+            // HTML error page (e.g. 502 Bad Gateway)
+          }
+          alert(errorMsg);
+          return;
+        }
+
+        const data = await res.json();
         if (data.success) {
           displayResults(data);
         } else {
@@ -555,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (err) {
         console.error('Analysis fetch error:', err);
-        alert('Error connecting to ML backend server.');
+        alert('Error connecting to ML backend server. Please try again.');
       } finally {
         analyzeBtn.disabled = false;
         updateAnalyzeBtnText();
