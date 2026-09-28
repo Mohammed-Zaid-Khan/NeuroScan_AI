@@ -60,7 +60,7 @@ with col1:
 
     if uploaded_file is not None:
         image = Image.open(uploaded_file).convert("RGB")
-        st.image(image, caption="Uploaded Scan Preview", use_column_width=True)
+        st.image(image, caption="Uploaded Scan Preview", use_container_width=True)
         temp_path = os.path.join(Config.UPLOAD_FOLDER, "temp_stream_mri.png")
         image.save(temp_path)
 
@@ -87,8 +87,8 @@ with col1:
                     
                     res_col1, res_col2 = st.columns(2)
                     with res_col1:
-                        st.image(mask, caption="Binary Mask (U-Net)", use_column_width=True)
+                        st.image(mask, caption="Binary Mask (U-Net)", use_container_width=True)
                     with res_col2:
-                        st.image(overlay_path, caption="Tumor Color Overlay", use_column_width=True)
+                        st.image(overlay_path, caption="Tumor Color Overlay", use_container_width=True)
                     
                     st.metric("Tumor Area Coverage", f"{tumor_pct}%", f"{tumor_px} px")
