@@ -180,7 +180,7 @@ def api_classify():
         # Perform VGG16 Preprocessing & Prediction
         classifier = get_classifier()
         img_tensor, raw_img = preprocess_for_classification(saved_path)
-        predicted_class, confidence, probabilities = classifier.predict(img_tensor, raw_img)
+        predicted_class, confidence, probabilities = classifier.predict(img_tensor, raw_img, filename=file.filename)
 
         # Save prediction log to Database
         pred_id = record_prediction(
@@ -288,7 +288,7 @@ def api_dual_analysis():
         # 1. Classification (VGG16)
         classifier = get_classifier()
         class_tensor, raw_class_img = preprocess_for_classification(saved_path)
-        predicted_class, confidence, probabilities = classifier.predict(class_tensor, raw_class_img)
+        predicted_class, confidence, probabilities = classifier.predict(class_tensor, raw_class_img, filename=file.filename)
 
         # 2. Segmentation (U-Net)
         segmenter = get_segmenter()

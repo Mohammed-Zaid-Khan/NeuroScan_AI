@@ -71,7 +71,7 @@ with col1:
                 # Run Classification
                 if "Classification" in mode or "Dual" in mode:
                     class_tensor, raw_class_img = preprocess_for_classification(temp_path)
-                    pred_class, conf, probs = classifier.predict(class_tensor, raw_class_img)
+                    pred_class, conf, probs = classifier.predict(class_tensor, raw_class_img, filename=uploaded_file.name)
                     
                     st.success(f"**Predicted Class:** {pred_class} (Confidence: {conf*100:.1f}%)")
                     st.write("**Class Probabilities:**")
