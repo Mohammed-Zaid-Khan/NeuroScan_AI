@@ -64,20 +64,33 @@ with col1:
         temp_path = os.path.join(Config.UPLOAD_FOLDER, "temp_stream_mri.png")
         image.save(temp_path)
 
-        if st.button("Run AI Analysis"):
+        # Dynamic Action Button Label
+        btn_label = "Run Dual AI Analysis"
+        if "Classification" in mode:
+            btn_label = "Run VGG16 Classification"
+        elif "Segmentation" in mode:
+            btn_label = "Run U-Net Segmentation"
+
+        if st.button(btn_label):
             with col2:
-                st.subheader("Diagnostic Results & Visualizations")
+                if "Dual" in mode:
+                    st.subheader("Diagnostic Results — Dual AI Pipeline (VGG16 + U-Net)")
+                elif "Classification" in mode:
+                    st.subheader("Diagnostic Results — VGG16 Classification")
+                else:
+                    st.subheader("Diagnostic Results — U-Net Segmentation")
                 
-                # Run Classification
+                # 1. Run Classification Output (Classification or Dual mode)
                 if "Classification" in mode or "Dual" in mode:
                     class_tensor, raw_class_img = preprocess_for_classification(temp_path)
                     pred_class, conf, probs = classifier.predict(class_tensor, raw_class_img, filename=uploaded_file.name)
                     
+                    st.markdown("### 🏷️ VGG16 Classification")
                     st.success(f"**Predicted Class:** {pred_class} (Confidence: {conf*100:.1f}%)")
-                    st.write("**Class Probabilities:**")
+                    st.write("**Class Probability Breakdown:**")
                     st.json(probs)
 
-                # Run Segmentation
+                # 2. Run Segmentation Output (Segmentation or Dual mode)
                 if "Segmentation" in mode or "Dual" in mode:
                     seg_tensor, raw_seg_img = preprocess_for_segmentation(temp_path)
                     mask = segmenter.predict_mask(seg_tensor, raw_seg_img)
@@ -85,6 +98,7 @@ with col1:
                     overlay_path = os.path.join(Config.SEGMENT_FOLDER, "temp_stream_overlay.png")
                     tumor_px, tumor_pct = generate_color_overlay(temp_path, mask, overlay_path)
                     
+                    st.markdown("### 🧩 U-Net Tumor Segmentation")
                     res_col1, res_col2 = st.columns(2)
                     with res_col1:
                         st.image(mask, caption="Binary Mask (U-Net)", use_container_width=True)
