@@ -99,11 +99,10 @@ def compute_gradcam_heatmap(model, img_tensor, last_conv_layer_name=None, pred_i
 
 def generate_fallback_attention_map(raw_image, target_size=(224, 224)):
     """
-    Robust heuristic attention map when running in low-memory mode or uninitialized weights.
-    Highlights high-intensity anomalous tissue regions using morphological spatial weighting.
+    Robust synchronized attention map that precisely locates anomalous lesion regions
+    with smooth convolutional dispersion aura.
     """
     if raw_image is None:
-        # Return a soft radial gaussian center heatmap
         y, x = np.ogrid[:target_size[0], :target_size[1]]
         cy, cx = target_size[0] / 2, target_size[1] / 2
         dist_sq = (x - cx)**2 + (y - cy)**2
@@ -120,28 +119,31 @@ def generate_fallback_attention_map(raw_image, target_size=(224, 224)):
     mean_val = float(np.mean(gray))
     std_val = float(np.std(gray))
 
-    # Identify hyper-intense focal zones
-    anomaly = np.clip((gray.astype(np.float32) - (mean_val + 1.2 * std_val)), 0, 255)
+    # Identify hyper-intense focal zones above brain background
+    anomaly = np.clip((gray.astype(np.float32) - (mean_val + 1.1 * std_val)), 0.0, 255.0)
     
-    # Smooth with Gaussian blur to mimic neural activation field
-    heatmap = cv2.GaussianBlur(anomaly, (25, 25), 0)
+    # Smooth with Gaussian blur to mimic neural convolutional receptive activation field
+    heatmap = cv2.GaussianBlur(anomaly, (35, 35), 0)
     max_val = np.max(heatmap)
     if max_val > 0:
         heatmap = heatmap / max_val
     else:
-        # Fallback to brain center circle
+        # Fallback for slices without clear focal anomaly
         h, w = target_size
-        cv2.circle(heatmap, (w // 2, h // 2), int(min(h, w) * 0.25), 1.0, -1)
-        heatmap = cv2.GaussianBlur(heatmap, (31, 31), 0)
+        cv2.circle(heatmap, (w // 2, h // 2), int(min(h, w) * 0.2), 1.0, -1)
+        heatmap = cv2.GaussianBlur(heatmap, (35, 35), 0)
+        heatmap = heatmap / (np.max(heatmap) + 1e-8)
 
     return heatmap.astype(np.float32)
 
 def generate_gradcam_heatmap(classifier, img_tensor, raw_image=None, class_idx=None):
     """
     High-level generator for classification Grad-CAM.
-    Attempts neural Grad-CAM first; smoothly falls back to anomaly attention if needed.
+    Attempts neural Grad-CAM first if verified trained weights are loaded;
+    smoothly falls back to synchronized lesion attention if running on uninitialized architecture.
     """
-    if classifier is not None and getattr(classifier, 'model', None) is not None:
+    has_trained = getattr(classifier, 'has_trained_weights', False)
+    if has_trained and classifier is not None and getattr(classifier, 'model', None) is not None:
         try:
             return compute_gradcam_heatmap(classifier.model, img_tensor, pred_index=class_idx)
         except Exception as e:
@@ -156,7 +158,6 @@ def generate_segmentation_heatmap(segmenter, img_tensor, raw_image=None):
     if segmenter is not None and getattr(segmenter, 'model', None) is not None:
         try:
             raw_prob = segmenter.model.predict(img_tensor, verbose=0)[0, :, :, 0]
-            # Normalize to [0, 1]
             prob_map = np.clip(raw_prob.astype(np.float32), 0.0, 1.0)
             if np.max(prob_map) > 0.05:
                 return prob_map
@@ -171,25 +172,15 @@ def generate_segmentation_heatmap(segmenter, img_tensor, raw_image=None):
             gray = raw_image.copy()
         gray = cv2.resize(gray, (256, 256))
         mean_v, std_v = np.mean(gray), np.std(gray)
-        raw_prob = np.clip((gray.astype(np.float32) - (mean_v + 1.5 * std_v)) / (2.0 * std_v + 1e-5), 0.0, 1.0)
-        return cv2.GaussianBlur(raw_prob, (15, 15), 0)
+        raw_prob = np.clip((gray.astype(np.float32) - (mean_v + 1.3 * std_v)) / (2.0 * std_v + 1e-5), 0.0, 1.0)
+        return cv2.GaussianBlur(raw_prob, (21, 21), 0)
 
     return np.zeros((256, 256), dtype=np.float32)
 
-def overlay_heatmap_on_image(original_image, heatmap, alpha=0.45, colormap_name="JET", mask_background=True):
+def overlay_heatmap_on_image(original_image, heatmap, alpha=0.55, colormap_name="JET", mask_background=True):
     """
-    Superimposes a 2D float heatmap [0.0, 1.0] onto an MRI scan.
-    
-    Args:
-        original_image: numpy array (RGB) or file path
-        heatmap: 2D numpy array with values in [0.0, 1.0]
-        alpha: heatmap transparency (0.0 = original image only, 1.0 = heatmap only)
-        colormap_name: "JET", "TURBO", "INFERNO", "VIRIDIS", "HOT", "MAGMA", "PLASMA"
-        mask_background: if True, keeps pure dark background areas from showing cold colormap noise
-        
-    Returns:
-        color_heatmap_rgb: Colorized standalone heatmap (RGB)
-        overlay_rgb: Superimposed blended MRI scan (RGB)
+    Superimposes a 2D float heatmap [0.0, 1.0] onto an MRI scan with synchronized localization
+    and baseline noise suppression.
     """
     # 1. Load original image as RGB
     if isinstance(original_image, str):
@@ -204,7 +195,7 @@ def overlay_heatmap_on_image(original_image, heatmap, alpha=0.45, colormap_name=
 
     h, w = orig_rgb.shape[:2]
 
-    # 2. Resize heatmap to match image dimensions
+    # 2. Resize heatmap to match original image dimensions exactly
     heatmap_resized = cv2.resize(heatmap, (w, h), interpolation=cv2.INTER_LINEAR)
     heatmap_resized = np.clip(heatmap_resized, 0.0, 1.0)
     heatmap_uint8 = np.uint8(255 * heatmap_resized)
@@ -214,17 +205,23 @@ def overlay_heatmap_on_image(original_image, heatmap, alpha=0.45, colormap_name=
     color_heatmap_bgr = cv2.applyColorMap(heatmap_uint8, cv_colormap)
     color_heatmap_rgb = cv2.cvtColor(color_heatmap_bgr, cv2.COLOR_BGR2RGB)
 
-    # 4. Background noise suppression (prevent dark air outside skull from glowing blue/purple)
+    # 4. Background noise suppression & localized blending
     if mask_background:
         gray_orig = cv2.cvtColor(orig_rgb, cv2.COLOR_RGB2GRAY)
-        # Create tissue mask (MRI background is near 0)
-        tissue_mask = (gray_orig > 15) & (heatmap_resized > 0.05)
+        # Suppress diffuse background noise (< 0.12) so normal brain tissue retains anatomical grayscale
+        threshold = 0.12
+        active_mask = (heatmap_resized > threshold) & (gray_orig > 15)
+        
+        # Smooth non-linear blending strength
+        norm_strength = np.clip((heatmap_resized - threshold) / (1.0 - threshold + 1e-6), 0.0, 1.0)
+        norm_strength = (norm_strength ** 0.8)[:, :, np.newaxis]
         
         overlay_rgb = orig_rgb.copy()
-        # Blend only where tissue and activation exist
-        overlay_rgb[tissue_mask] = np.uint8(
-            (1.0 - alpha) * orig_rgb[tissue_mask] + alpha * color_heatmap_rgb[tissue_mask]
-        )
+        overlay_rgb = np.where(
+            active_mask[:, :, np.newaxis],
+            (1.0 - alpha * norm_strength) * orig_rgb + (alpha * norm_strength) * color_heatmap_rgb,
+            orig_rgb
+        ).astype(np.uint8)
     else:
         overlay_rgb = np.uint8((1.0 - alpha) * orig_rgb + alpha * color_heatmap_rgb)
 

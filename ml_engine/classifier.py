@@ -22,9 +22,11 @@ class BrainTumorClassifier:
 
     def _load_or_build_model(self):
         """Loads saved .h5 weights if available, or builds initialized VGG16 architecture."""
+        self.has_trained_weights = False
         if os.path.exists(self.model_path):
             try:
                 self.model = load_model(self.model_path)
+                self.has_trained_weights = True
                 print(f"[INFO] VGG16 Classifier loaded successfully from '{self.model_path}'.")
                 return
             except Exception as e:
