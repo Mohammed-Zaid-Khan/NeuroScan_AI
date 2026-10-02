@@ -9,6 +9,7 @@ os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
 os.environ['PYTHONUNBUFFERED'] = '1'
 
 import uuid
+import cv2
 from flask import Flask, render_template, request, jsonify, session, send_from_directory, url_for
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -249,7 +250,6 @@ def api_segment():
 
         mask_filename = f"mask_{uuid.uuid4().hex[:10]}.png"
         mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
-        import cv2
         cv2.imwrite(mask_path, mask)
 
         # Generate continuous probability density heatmap
@@ -328,7 +328,6 @@ def api_dual_analysis():
 
         mask_filename = f"mask_{uuid.uuid4().hex[:10]}.png"
         mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
-        import cv2
         cv2.imwrite(mask_path, mask)
 
         prob_map = segmenter.predict_probability_map(seg_tensor, raw_seg_img)
