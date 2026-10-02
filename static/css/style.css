@@ -1231,11 +1231,52 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* RESULTS SECTION & STAGE GRID */
+.vis-tab-btn {
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.vis-tab-btn:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.vis-tab-btn.active {
+  background: var(--color-primary);
+  color: #FFFFFF;
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(39, 103, 168, 0.25);
+}
+
 .stage-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.stage-grid.grid-focus-2 {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+.stage-grid.grid-focus-3 {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.stage-grid.grid-focus-5 {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
 }
 
 .stage-box {

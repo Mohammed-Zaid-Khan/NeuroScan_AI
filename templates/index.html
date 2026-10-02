@@ -403,24 +403,54 @@
               <!-- RESULTS SECTION -->
               <div id="resultsSection" style="display: none">
                 
-                <!-- 3-STAGE MRI VISUALIZATION COMPARISON GRID -->
-                <div class="stage-grid">
-                  <div class="stage-box">
-                    <div class="stage-label">Original MRI</div>
+                <!-- VISUALIZATION TABS / VIEW SWITCHER -->
+                <div class="vis-tab-row" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.15rem; border-bottom: 1px solid var(--border-default); padding-bottom: 0.65rem;">
+                  <button type="button" class="vis-tab-btn active" data-view="all" id="visTabAll">
+                    <i class="fas fa-th-large"></i> All Visualizations (5-Stage)
+                  </button>
+                  <button type="button" class="vis-tab-btn" data-view="gradcam" id="visTabGradcam">
+                    <i class="fas fa-fire"></i> Grad-CAM Heatmap (JET)
+                  </button>
+                  <button type="button" class="vis-tab-btn" data-view="density" id="visTabDensity">
+                    <i class="fas fa-water"></i> Probability Density (TURBO)
+                  </button>
+                  <button type="button" class="vis-tab-btn" data-view="stages" id="visTabStages">
+                    <i class="fas fa-layer-group"></i> Clinical Stages
+                  </button>
+                </div>
+
+                <!-- 5-STAGE MRI VISUALIZATION COMPARISON GRID -->
+                <div class="stage-grid" id="mainStageGrid">
+                  <div class="stage-box" id="origStageBox">
+                    <div class="stage-label">1. Original MRI</div>
                     <div class="preview-stage">
                       <img id="originalScanImg" class="preview-img" src="" alt="Original MRI Scan">
                     </div>
                   </div>
 
+                  <div class="stage-box" id="gradcamStageBox">
+                    <div class="stage-label">2. Grad-CAM Heatmap (VGG16)</div>
+                    <div class="preview-stage">
+                      <img id="gradcamScanImg" class="preview-img" src="" alt="Grad-CAM Attention Heatmap">
+                    </div>
+                  </div>
+
+                  <div class="stage-box" id="densityStageBox">
+                    <div class="stage-label">3. Probability Density (U-Net)</div>
+                    <div class="preview-stage">
+                      <img id="densityScanImg" class="preview-img" src="" alt="Tumor Probability Density Map">
+                    </div>
+                  </div>
+
                   <div class="stage-box" id="maskStageBox">
-                    <div class="stage-label">Binary Mask (U-Net)</div>
+                    <div class="stage-label">4. Binary Mask (U-Net)</div>
                     <div class="preview-stage">
                       <img id="maskScanImg" class="preview-img" src="" alt="U-Net Binary Mask">
                     </div>
                   </div>
 
                   <div class="stage-box" id="overlayStageBox">
-                    <div class="stage-label">Tumor Overlay</div>
+                    <div class="stage-label">5. Delineated Overlay</div>
                     <div class="preview-stage">
                       <img id="overlayScanImg" class="preview-img" src="" alt="Tumor Color Overlay">
                     </div>

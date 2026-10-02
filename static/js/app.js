@@ -618,6 +618,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (maskScanImg && data.mask_image_url) maskScanImg.src = data.mask_image_url;
     if (overlayScanImg && data.overlay_image_url) overlayScanImg.src = data.overlay_image_url;
 
+    // Grad-CAM and Continuous Probability Heatmaps
+    const gradcamScanImg = document.getElementById('gradcamScanImg');
+    const densityScanImg = document.getElementById('densityScanImg');
+    const gradcamStageBox = document.getElementById('gradcamStageBox');
+    const densityStageBox = document.getElementById('densityStageBox');
+
+    if (gradcamScanImg && data.gradcam_image_url) {
+      gradcamScanImg.src = data.gradcam_image_url;
+      if (gradcamStageBox) gradcamStageBox.style.display = 'flex';
+    } else if (gradcamStageBox && currentMode === 'segment') {
+      gradcamStageBox.style.display = 'none';
+    }
+
+    if (densityScanImg && data.density_heatmap_url) {
+      densityScanImg.src = data.density_heatmap_url;
+      if (densityStageBox) densityStageBox.style.display = 'flex';
+    } else if (densityStageBox && currentMode === 'classify') {
+      densityStageBox.style.display = 'none';
+    }
+
     if (data.predicted_class) {
       if (classBadge) classBadge.textContent = data.predicted_class;
       if (confidenceBadge) confidenceBadge.textContent = `${data.confidence_score}%`;
@@ -646,6 +666,58 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tumorAreaBadge) tumorAreaBadge.textContent = `${(data.tumor_area_pixels || 0).toLocaleString()} px`;
     }
   }
+
+  // Visualization Mode Switcher Tabs
+  const visTabBtns = document.querySelectorAll('.vis-tab-btn');
+  const mainStageGrid = document.getElementById('mainStageGrid');
+
+  visTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      visTabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const view = btn.dataset.view;
+
+      const gradcamBox = document.getElementById('gradcamStageBox');
+      const densityBox = document.getElementById('densityStageBox');
+      const maskBox = document.getElementById('maskStageBox');
+      const overlayBox = document.getElementById('overlayStageBox');
+      const origBox = document.getElementById('origStageBox');
+
+      if (!mainStageGrid) return;
+      mainStageGrid.classList.remove('grid-focus-2', 'grid-focus-3', 'grid-focus-5');
+
+      if (view === 'gradcam') {
+        if (origBox) origBox.style.display = 'flex';
+        if (gradcamBox) gradcamBox.style.display = 'flex';
+        if (densityBox) densityBox.style.display = 'none';
+        if (maskBox) maskBox.style.display = 'none';
+        if (overlayBox) overlayBox.style.display = 'none';
+        mainStageGrid.classList.add('grid-focus-2');
+      } else if (view === 'density') {
+        if (origBox) origBox.style.display = 'flex';
+        if (gradcamBox) gradcamBox.style.display = 'none';
+        if (densityBox) densityBox.style.display = 'flex';
+        if (maskBox) maskBox.style.display = 'none';
+        if (overlayBox) overlayBox.style.display = 'none';
+        mainStageGrid.classList.add('grid-focus-2');
+      } else if (view === 'stages') {
+        if (origBox) origBox.style.display = 'flex';
+        if (gradcamBox) gradcamBox.style.display = 'none';
+        if (densityBox) densityBox.style.display = 'none';
+        if (maskBox) maskBox.style.display = 'flex';
+        if (overlayBox) overlayBox.style.display = 'flex';
+        mainStageGrid.classList.add('grid-focus-3');
+      } else {
+        // 'all'
+        if (origBox) origBox.style.display = 'flex';
+        if (gradcamBox) gradcamBox.style.display = 'flex';
+        if (densityBox) densityBox.style.display = 'flex';
+        if (maskBox) maskBox.style.display = 'flex';
+        if (overlayBox) overlayBox.style.display = 'flex';
+        mainStageGrid.classList.add('grid-focus-5');
+      }
+    });
+  });
 
   if (opacitySlider) {
     opacitySlider.addEventListener('input', (e) => {
