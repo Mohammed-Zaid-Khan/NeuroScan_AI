@@ -23,6 +23,11 @@ from ml_engine.preprocessing import (
 )
 from ml_engine.classifier import BrainTumorClassifier
 from ml_engine.segmenter import BrainTumorSegmenter
+from ml_engine.gradcam import (
+    generate_gradcam_heatmap,
+    generate_segmentation_heatmap,
+    overlay_heatmap_on_image
+)
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -182,6 +187,13 @@ def api_classify():
         img_tensor, raw_img = preprocess_for_classification(saved_path)
         predicted_class, confidence, probabilities = classifier.predict(img_tensor, raw_img, filename=file.filename)
 
+        # Generate Grad-CAM Heatmap Overlay
+        gradcam_map = generate_gradcam_heatmap(classifier, img_tensor, raw_img)
+        _, gradcam_overlay = overlay_heatmap_on_image(saved_path, gradcam_map, alpha=0.45, colormap_name="JET")
+        gradcam_filename = f"gradcam_{uuid.uuid4().hex[:10]}.png"
+        gradcam_path = os.path.join(Config.SEGMENT_FOLDER, gradcam_filename)
+        cv2.imwrite(gradcam_path, cv2.cvtColor(gradcam_overlay, cv2.COLOR_RGB2BGR))
+
         # Save prediction log to Database
         pred_id = record_prediction(
             upload_id=upload_id,
@@ -197,6 +209,7 @@ def api_classify():
             'prediction_id': pred_id,
             'upload_id': upload_id,
             'original_image_url': f"/static/uploads/{unique_filename}",
+            'gradcam_image_url': f"/static/segmented/{gradcam_filename}",
             'predicted_class': predicted_class,
             'confidence_score': round(confidence * 100, 2),
             'probabilities': probabilities,
@@ -239,6 +252,13 @@ def api_segment():
         import cv2
         cv2.imwrite(mask_path, mask)
 
+        # Generate continuous probability density heatmap
+        prob_map = segmenter.predict_probability_map(img_tensor, raw_img)
+        _, prob_overlay = overlay_heatmap_on_image(saved_path, prob_map, alpha=0.45, colormap_name="TURBO")
+        density_filename = f"density_{uuid.uuid4().hex[:10]}.png"
+        density_path = os.path.join(Config.SEGMENT_FOLDER, density_filename)
+        cv2.imwrite(density_path, cv2.cvtColor(prob_overlay, cv2.COLOR_RGB2BGR))
+
         # Record prediction
         pred_id = record_prediction(
             upload_id=upload_id,
@@ -258,6 +278,7 @@ def api_segment():
             'original_image_url': f"/static/uploads/{unique_filename}",
             'overlay_image_url': f"/static/segmented/{overlay_filename}",
             'mask_image_url': f"/static/segmented/{mask_filename}",
+            'density_heatmap_url': f"/static/segmented/{density_filename}",
             'tumor_percentage': tumor_percentage,
             'tumor_area_pixels': tumor_pixels,
             'has_tumor': tumor_pixels > 0,
@@ -285,12 +306,18 @@ def api_dual_analysis():
         user_id = session.get('user', {}).get('id')
         upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
 
-        # 1. Classification (VGG16)
+        # 1. Classification (VGG16) & Grad-CAM
         classifier = get_classifier()
         class_tensor, raw_class_img = preprocess_for_classification(saved_path)
         predicted_class, confidence, probabilities = classifier.predict(class_tensor, raw_class_img, filename=file.filename)
 
-        # 2. Segmentation (U-Net)
+        gradcam_map = generate_gradcam_heatmap(classifier, class_tensor, raw_class_img)
+        _, gradcam_overlay = overlay_heatmap_on_image(saved_path, gradcam_map, alpha=0.45, colormap_name="JET")
+        gradcam_filename = f"gradcam_{uuid.uuid4().hex[:10]}.png"
+        gradcam_path = os.path.join(Config.SEGMENT_FOLDER, gradcam_filename)
+        cv2.imwrite(gradcam_path, cv2.cvtColor(gradcam_overlay, cv2.COLOR_RGB2BGR))
+
+        # 2. Segmentation (U-Net) & Probability Heatmap
         segmenter = get_segmenter()
         seg_tensor, raw_seg_img = preprocess_for_segmentation(saved_path)
         mask = segmenter.predict_mask(seg_tensor, raw_seg_img)
@@ -303,6 +330,12 @@ def api_dual_analysis():
         mask_path = os.path.join(Config.SEGMENT_FOLDER, mask_filename)
         import cv2
         cv2.imwrite(mask_path, mask)
+
+        prob_map = segmenter.predict_probability_map(seg_tensor, raw_seg_img)
+        _, prob_overlay = overlay_heatmap_on_image(saved_path, prob_map, alpha=0.45, colormap_name="TURBO")
+        density_filename = f"density_{uuid.uuid4().hex[:10]}.png"
+        density_path = os.path.join(Config.SEGMENT_FOLDER, density_filename)
+        cv2.imwrite(density_path, cv2.cvtColor(prob_overlay, cv2.COLOR_RGB2BGR))
 
         # Record combined prediction in DB
         pred_id = record_prediction(
@@ -325,6 +358,8 @@ def api_dual_analysis():
             'original_image_url': f"/static/uploads/{unique_filename}",
             'overlay_image_url': f"/static/segmented/{overlay_filename}",
             'mask_image_url': f"/static/segmented/{mask_filename}",
+            'gradcam_image_url': f"/static/segmented/{gradcam_filename}",
+            'density_heatmap_url': f"/static/segmented/{density_filename}",
             'predicted_class': predicted_class,
             'confidence_score': round(confidence * 100, 2),
             'probabilities': probabilities,
