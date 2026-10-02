@@ -46,23 +46,22 @@ st.set_page_config(
 )
 
 # ----------------------------------------------------
-# 1. EXACT CLINICAL CSS STYLING (MATCHING LOCALHOST)
+# 1. EXACT CLINICAL CSS STYLING (LOCAL WORKSTATION MATCH)
 # ----------------------------------------------------
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    html, body, [class*="css"] {
+    html, body, [class*="css"], .stMarkdown, .stText {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
     
     .stApp {
-        background-color: #F3F6F9;
-        max-width: 1440px;
+        background-color: #F3F6F9 !important;
+        max-width: 1400px;
         margin: 0 auto;
     }
     
-    /* Hide Default Streamlit Header & Footer */
     header[data-testid="stHeader"] {
         display: none !important;
     }
@@ -70,7 +69,7 @@ st.markdown("""
         display: none !important;
     }
     .block-container {
-        padding-top: 1rem !important;
+        padding-top: 1.25rem !important;
         padding-bottom: 2rem !important;
         padding-left: 2rem !important;
         padding-right: 2rem !important;
@@ -84,25 +83,23 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
         box-shadow: 0 4px 16px rgba(13, 38, 59, 0.12);
         color: #FFFFFF;
     }
-    
     .nav-brand-title {
         font-size: 1.35rem;
         font-weight: 700;
         letter-spacing: -0.02em;
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.65rem;
         color: #FFFFFF;
     }
     .brand-accent {
         color: #64B5F6;
         font-weight: 800;
     }
-    
     .status-badge-live {
         display: inline-flex;
         align-items: center;
@@ -122,7 +119,6 @@ st.markdown("""
         background-color: #48BB78;
         box-shadow: 0 0 8px #48BB78;
     }
-
     .profile-chip {
         display: inline-flex;
         align-items: center;
@@ -148,6 +144,36 @@ st.markdown("""
         color: #FFFFFF;
     }
 
+    /* AUTHENTICATION FULLSCREEN SPLIT LAYOUT */
+    .auth-banner-left {
+        background: linear-gradient(135deg, #0D263B 0%, #12304A 100%);
+        border-radius: 14px;
+        padding: 3rem 2.5rem;
+        color: #FFFFFF;
+        height: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(13, 38, 59, 0.15);
+    }
+    .auth-card-right {
+        background: #FFFFFF;
+        border-radius: 14px;
+        padding: 3rem 2.5rem;
+        border: 1px solid #D8E1EA;
+        box-shadow: 0 10px 30px rgba(13, 38, 59, 0.08);
+        height: 100%;
+    }
+    .auth-cap-pill {
+        display: inline-block;
+        padding: 0.2rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-right: 0.6rem;
+    }
+    .cap-indigo { background: rgba(101, 88, 200, 0.25); color: #B2AAFB; border: 1px solid rgba(101, 88, 200, 0.4); }
+    .cap-teal { background: rgba(22, 140, 136, 0.25); color: #6BE5E1; border: 1px solid rgba(22, 140, 136, 0.4); }
+    .cap-blue { background: rgba(39, 103, 168, 0.25); color: #8EC2F5; border: 1px solid rgba(39, 103, 168, 0.4); }
+
     /* WORKSPACE HERO HEADER */
     .workspace-pill-tag {
         display: inline-block;
@@ -166,16 +192,16 @@ st.markdown("""
         margin-left: 0.5rem;
     }
     .hero-title-main {
-        font-size: 1.65rem;
+        font-size: 1.7rem;
         font-weight: 800;
         color: #172538;
-        margin-top: 0.25rem;
+        margin-top: 0.35rem;
         margin-bottom: 0.2rem;
         letter-spacing: -0.025em;
     }
     .hero-subtitle-main {
         color: #536579;
-        font-size: 0.92rem;
+        font-size: 0.94rem;
         margin-bottom: 1.25rem;
     }
 
@@ -214,38 +240,36 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* SAMPLE CHIPS CONTAINER */
-    .sample-module-header {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #172538;
-        margin-top: 0.85rem;
-        margin-bottom: 0.15rem;
-    }
-    .sample-module-caption {
-        font-size: 0.78rem;
-        color: #8290A0;
-        margin-bottom: 0.65rem;
-    }
-
-    /* RESULTS STAGE GRID */
-    .stage-card-box {
-        background: #0D1720;
-        border: 1px solid #223446;
-        border-radius: 10px;
-        padding: 0.65rem;
+    /* EMPTY STATE PLACEHOLDER */
+    .empty-state-box {
         text-align: center;
+        padding: 3.5rem 1.5rem;
+        color: #536579;
     }
-    .stage-card-label {
-        font-size: 0.78rem;
+    .empty-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #EEF4FA;
+        color: #2767A8;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+    .workflow-steps-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        color: #8290A0;
+        font-size: 0.82rem;
         font-weight: 600;
-        color: #9BB1C7;
-        margin-bottom: 0.45rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
     }
 
-    /* METRIC CARDS */
+    /* METRIC TILES */
     .metric-grid-4 {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -274,7 +298,6 @@ st.markdown("""
     .val-indigo { color: #6558C8; }
     .val-teal { color: #168C88; }
     .val-success { color: #2D7C5C; }
-    .val-danger { color: #C94C4C; }
 
     /* ACTION BUTTONS */
     .stButton>button {
@@ -295,42 +318,32 @@ st.markdown("""
         box-shadow: 0 6px 18px rgba(39, 103, 168, 0.35) !important;
     }
 
-    /* EMPTY STATE PLACEHOLDER */
-    .empty-state-box {
+    /* STAGE GRID */
+    .stage-card-box {
+        background: #0D1720;
+        border: 1px solid #223446;
+        border-radius: 10px;
+        padding: 0.65rem;
         text-align: center;
-        padding: 3.5rem 1.5rem;
-        color: #536579;
     }
-    .empty-icon-circle {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: #EEF4FA;
-        color: #2767A8;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-    }
-    .workflow-steps-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        margin-top: 1.5rem;
-        color: #8290A0;
-        font-size: 0.8rem;
+    .stage-card-label {
+        font-size: 0.78rem;
         font-weight: 600;
+        color: #9BB1C7;
+        margin-bottom: 0.45rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------------------------------------------
-# 2. SESSION STATE MANAGEMENT
+# 2. APPLICATION STATE
 # ----------------------------------------------------
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = True  # Set to True so localhost users go right in, but login is available!
+
 if "user" not in st.session_state:
-    # Default authenticated session as Dr. Sapna (Doctor/Radiologist)
     st.session_state.user = {
         "id": 1,
         "username": "Dr. Sapna",
@@ -353,18 +366,18 @@ if "selected_scan_name" not in st.session_state:
 if "analysis_results" not in st.session_state:
     st.session_state.analysis_results = None
 
-# Model Loader Cache
+# AI Models Engine
 @st.cache_resource
-def load_ai_engines():
+def get_inference_models():
     classifier = BrainTumorClassifier()
     segmenter = BrainTumorSegmenter()
     return classifier, segmenter
 
-with st.spinner("Initializing Deep Neural Networks (VGG16 & U-Net)..."):
-    classifier_engine, segmenter_engine = load_ai_engines()
+with st.spinner("Connecting to NeuroScan AI Deep Learning Engines..."):
+    classifier_model, segmenter_model = get_inference_models()
 
-# Helper: Generate Exact Localhost Sample Scans
-def create_localhost_sample_scan(tumor_type):
+# Helper: Generate Exact Localhost Sample MRI Scans
+def generate_sample_mri(tumor_type):
     """Replicates the exact brain MRI canvas scan generation from localhost JavaScript."""
     img = np.zeros((256, 256, 3), dtype=np.uint8)
     img[:] = (13, 7, 4)  # BGR '#04070d'
@@ -389,18 +402,124 @@ def create_localhost_sample_scan(tumor_type):
     img = cv2.GaussianBlur(img, (5, 5), 0)
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
-    # Encode as PNG bytes
     pil_img = Image.fromarray(rgb)
     buf = io.BytesIO()
     pil_img.save(buf, format="PNG")
     return buf.getvalue()
 
+
 # ----------------------------------------------------
-# 3. TOP CLINICAL NAVBAR
+# 3. AUTHENTICATION PAGE (EXACT LOCALHOST MATCH)
 # ----------------------------------------------------
-user_info = st.session_state.user
-user_name = user_info["username"] if user_info else "Guest"
-initials = "".join([part[0] for part in user_name.split() if part])[:2].upper() or "MD"
+if not st.session_state.authenticated:
+    st.write("")
+    auth_l, auth_r = st.columns([1, 1], gap="large")
+    
+    with auth_l:
+        st.markdown("""
+        <div class="auth-banner-left">
+            <div style="font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 2rem;">
+                <svg viewBox="0 0 32 32" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="#2767A8"/>
+                    <path d="M16 6C10.5 6 7 9.8 7 14.5C7 18 8.8 21 11.5 23.5V26H20.5V23.5C23.2 21 25 18 25 14.5C25 9.8 21.5 6 16 6Z" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 12H22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+                    <path d="M9 16H23" stroke="#64B5F6" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M11 20H21" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+                    <circle cx="18.5" cy="14.5" r="2" fill="#168C88" stroke="#FFFFFF" stroke-width="1"/>
+                </svg>
+                <span>NeuroScan <strong class="brand-accent">AI</strong></span>
+            </div>
+            
+            <h1 style="font-size: 2rem; font-weight: 800; color: #FFFFFF; line-height: 1.2; margin-bottom: 0.4rem;">
+                AI-Assisted Neuro-Imaging
+            </h1>
+            <h3 style="font-size: 1.2rem; font-weight: 500; color: #9BB1C7; margin-bottom: 1.25rem;">
+                Diagnostic Workspace
+            </h3>
+            <p style="color: #9BB1C7; font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
+                MRI classification and pixel-level tumor segmentation powered by VGG16 and U-Net deep neural network architectures.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+                <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                    <span class="auth-cap-pill cap-indigo">VGG16</span>
+                    <strong>MRI Classification</strong>
+                    <div style="color: #9BB1C7; font-size: 0.82rem; margin-top: 0.2rem;">4-class tumor probability breakdown</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                    <span class="auth-cap-pill cap-teal">U-Net</span>
+                    <strong>Tumor Segmentation</strong>
+                    <div style="color: #9BB1C7; font-size: 0.82rem; margin-top: 0.2rem;">Pixel-level mask generation & area metrics</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                    <span class="auth-cap-pill cap-blue">Secure</span>
+                    <strong>Protected Workspace</strong>
+                    <div style="color: #9BB1C7; font-size: 0.82rem; margin-top: 0.2rem;">Session tracking & persistent audit log</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 3rem; font-size: 0.8rem; color: #64748B;">
+                Clinical Decision Support System v2.4
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with auth_r:
+        st.markdown("""
+        <div class="auth-card-right">
+            <h2 style="font-weight: 700; color: #172538; margin-bottom: 0.25rem;">Welcome back</h2>
+            <p style="color: #536579; font-size: 0.92rem; margin-bottom: 1.5rem;">Sign in to access your diagnostic workspace.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        auth_mode = st.radio("Auth Mode", ["Sign In", "Create Account"], horizontal=True, label_visibility="collapsed")
+        
+        if auth_mode == "Sign In":
+            in_email = st.text_input("Email address", value="sapna26@gmail.com")
+            in_pass = st.text_input("Password", type="password", value="Sapna@123")
+            
+            b1, b2 = st.columns([2, 1])
+            with b1:
+                if st.button("Sign In to NeuroScan", key="btn_login_submit"):
+                    res = authenticate_user(in_email, in_pass)
+                    if res["success"]:
+                        st.session_state.authenticated = True
+                        st.session_state.user = res["user"]
+                        st.rerun()
+                    else:
+                        st.error(res.get("message", "Invalid email or password."))
+            with b2:
+                if st.button("Use demo account", key="btn_use_demo_login"):
+                    res = authenticate_user("sapna26@gmail.com", "Sapna@123")
+                    if res["success"]:
+                        st.session_state.authenticated = True
+                        st.session_state.user = res["user"]
+                        st.rerun()
+        else:
+            new_name = st.text_input("Full Name / Username", placeholder="e.g. Dr. Sapna")
+            new_role = st.selectbox("Professional Role", ["Doctor/Radiologist", "Researcher/Academic", "Medical Student"])
+            new_email = st.text_input("Email address", placeholder="doctor@hospital.org")
+            new_pass = st.text_input("Password", type="password")
+            
+            if st.button("Create Account", key="btn_create_account"):
+                if new_name and new_email and new_pass:
+                    reg_res = register_user(new_name, new_email, new_pass, new_role)
+                    if reg_res["success"]:
+                        st.success("Account created successfully! Please Sign In.")
+                    else:
+                        st.error(reg_res.get("message", "Registration failed."))
+                else:
+                    st.warning("Please fill in all registration fields.")
+
+    st.stop()
+
+
+# ----------------------------------------------------
+# 4. TOP CLINICAL NAVBAR
+# ----------------------------------------------------
+user_obj = st.session_state.user or {"username": "Dr. Sapna", "role": "Doctor/Radiologist"}
+username_display = user_obj.get("username", "Dr. Sapna")
+initials_display = "".join([p[0] for p in username_display.split() if p])[:2].upper() or "DS"
 
 st.markdown(f"""
 <div class="clinical-navbar">
@@ -421,87 +540,45 @@ st.markdown(f"""
             <span>AI Engines Online</span>
         </div>
         <div class="profile-chip">
-            <span class="avatar-icon-circle">{initials}</span>
-            <span>{user_name}</span>
+            <span class="avatar-icon-circle">{initials_display}</span>
+            <span>{username_display}</span>
         </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Main Navigation Tab Bar
-nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1.5, 1.2, 1.2, 3.5])
-with nav_col1:
-    if st.button("🔬 Diagnostic Suite", key="btn_nav_diag"):
+# Main Navigation Views Row
+n_col1, n_col2, n_col3, n_col4 = st.columns([1.5, 1.2, 1.2, 3.5])
+with n_col1:
+    if st.button("🔬 Diagnostic Suite", key="nav_diag_tab"):
         st.session_state.active_nav = "Diagnostic Suite"
         st.rerun()
-with nav_col2:
-    if st.button("📈 Analytics", key="btn_nav_analytics"):
+with n_col2:
+    if st.button("📈 Analytics", key="nav_analytics_tab"):
         st.session_state.active_nav = "Analytics"
         st.rerun()
-with nav_col3:
-    if st.button("🗄️ Audit Log", key="btn_nav_audit"):
+with n_col3:
+    if st.button("🗄️ Audit Log", key="nav_audit_tab"):
         st.session_state.active_nav = "Audit Log"
         st.rerun()
-with nav_col4:
-    if st.session_state.user:
-        auth_action_col1, auth_action_col2 = st.columns([3, 1])
-        with auth_action_col2:
-            if st.button("Sign Out", key="btn_logout_action"):
-                st.session_state.user = None
-                st.rerun()
+with n_col4:
+    logout_col1, logout_col2 = st.columns([3, 1])
+    with logout_col2:
+        if st.button("Sign Out", key="nav_sign_out_btn"):
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.rerun()
 
 st.write("")
 
 # ----------------------------------------------------
-# VIEW 1: AUTHENTICATION SCREEN (If User Logs Out)
+# VIEW A: DIAGNOSTIC SUITE
 # ----------------------------------------------------
-if not st.session_state.user:
-    st.markdown("### 🔐 Clinician Authentication Required")
-    auth_card_col1, auth_card_col2 = st.columns([1, 1], gap="large")
+if st.session_state.active_nav == "Diagnostic Suite":
     
-    with auth_card_col1:
-        st.markdown("""
-        <div class="workstation-box" style="background: #12304A; color: white;">
-            <h2 style="color: white; margin-bottom: 0.5rem;">AI-Assisted Neuro-Imaging</h2>
-            <h4 style="color: #64B5F6; margin-bottom: 1rem;">Diagnostic Workspace</h4>
-            <p style="color: #9BB1C7; font-size: 0.95rem;">
-                MRI classification and pixel-level tumor segmentation powered by VGG16 and U-Net deep neural network architectures.
-            </p>
-            <hr style="border-color: rgba(255,255,255,0.15);">
-            <ul style="color: #E2E8F0; font-size: 0.9rem; line-height: 1.8;">
-                <li><strong>VGG16 Classification:</strong> 4-class tumor probability breakdown</li>
-                <li><strong>U-Net Segmentation:</strong> Pixel-level mask generation & area metrics</li>
-                <li><strong>Grad-CAM XAI:</strong> Explainable feature heatmaps for radiologist validation</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with auth_card_col2:
-        st.markdown('<div class="workstation-box">', unsafe_allow_html=True)
-        st.subheader("Sign In")
-        login_email = st.text_input("Email Address", value="sapna26@gmail.com")
-        login_pass = st.text_input("Password", type="password", value="Sapna@123")
-        
-        btn_sign_in = st.button("Sign In to Workstation")
-        if btn_sign_in:
-            auth_res = authenticate_user(login_email, login_pass)
-            if auth_res["success"]:
-                st.session_state.user = auth_res["user"]
-                st.success("Authenticated successfully!")
-                st.rerun()
-            else:
-                st.error(auth_res.get("message", "Invalid login credentials."))
-                
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# ----------------------------------------------------
-# VIEW 2: DIAGNOSTIC SUITE (MAIN WORKSTATION)
-# ----------------------------------------------------
-elif st.session_state.active_nav == "Diagnostic Suite":
-    
-    # Header Subtitle & Pipeline Selector Row
-    head_left, head_right = st.columns([2, 1])
-    with head_left:
+    # Header Subtitle & Pipeline Selector Row (Matching Localhost)
+    h_left, h_right = st.columns([2, 1])
+    with h_left:
         st.markdown("""
         <div>
             <span class="workspace-pill-tag">Diagnostic Suite</span>
@@ -512,20 +589,20 @@ elif st.session_state.active_nav == "Diagnostic Suite":
             </p>
         </div>
         """, unsafe_allow_html=True)
-    with head_right:
-        st.caption("**AI Pipeline Selector**")
+    with h_right:
+        st.caption("**AI PIPELINE**")
         st.session_state.pipeline_mode = st.radio(
-            "AI Pipeline",
+            "AI Pipeline Mode",
             ["Dual Pipeline", "Classification · VGG16", "Segmentation · U-Net"],
             horizontal=True,
             label_visibility="collapsed"
         )
 
-    # 2-COLUMN MAIN DIAGNOSTIC WORKSPACE
-    col_input, col_output = st.columns([1.1, 1.9], gap="large")
+    # 2-COLUMN MAIN WORKSTATION GRID (~36% / ~64%)
+    grid_left, grid_right = st.columns([1.1, 1.9], gap="large")
 
     # LEFT PANEL: MRI INPUT & SCAN CONTROLS
-    with col_input:
+    with grid_left:
         st.markdown("""
         <div class="card-header-row">
             <div class="card-header-title">
@@ -536,44 +613,48 @@ elif st.session_state.active_nav == "Diagnostic Suite":
         """, unsafe_allow_html=True)
 
         # File Dropzone
-        uploaded_file = st.file_uploader(
+        uploaded_scan = st.file_uploader(
             "Upload Brain MRI Scan",
             type=["png", "jpg", "jpeg", "tif", "tiff"],
             label_visibility="collapsed"
         )
 
-        if uploaded_file is not None:
-            st.session_state.selected_scan_bytes = uploaded_file.getvalue()
-            st.session_state.selected_scan_name = uploaded_file.name
+        if uploaded_scan is not None:
+            st.session_state.selected_scan_bytes = uploaded_scan.getvalue()
+            st.session_state.selected_scan_name = uploaded_scan.name
 
-        # Refined Example MRI Scans Buttons (Exact Localhost Feature)
+        # EXACT LOCALHOST FEATURE: Example MRI Scans Buttons
         st.markdown("""
-        <div class="sample-module-header">Example MRI Scans</div>
-        <div class="sample-module-caption">Load a sample to test the pipeline</div>
+        <div style="font-size: 0.88rem; font-weight: 700; color: #172538; margin-top: 0.85rem; margin-bottom: 0.15rem;">
+            Example MRI Scans
+        </div>
+        <div style="font-size: 0.78rem; color: #8290A0; margin-bottom: 0.65rem;">
+            Load a sample to test the pipeline
+        </div>
         """, unsafe_allow_html=True)
 
-        s_col1, s_col2, s_col3, s_col4 = st.columns(4)
-        with s_col1:
-            if st.button("🧠 Glioma", key="sample_glioma"):
-                st.session_state.selected_scan_bytes = create_localhost_sample_scan("glioma")
+        sc1, sc2, sc3, sc4 = st.columns(4)
+        with sc1:
+            if st.button("🧠 Glioma", key="btn_sample_glioma"):
+                st.session_state.selected_scan_bytes = generate_sample_mri("glioma")
                 st.session_state.selected_scan_name = "sample_glioma_mri.png"
                 st.session_state.analysis_results = None
                 st.rerun()
-        with s_col2:
-            if st.button("🧠 Meningioma", key="sample_meningioma"):
-                st.session_state.selected_scan_bytes = create_localhost_sample_scan("meningioma")
+        with sc2:
+            if st.button("🧠 Meningioma", key="btn_sample_meningioma"):
+                st.session_state.selected_scan_bytes = generate_sample_mri("meningioma")
                 st.session_state.selected_scan_name = "sample_meningioma_mri.png"
                 st.session_state.analysis_results = None
                 st.rerun()
-        with s_col3:
-            if st.button("🧠 Pituitary", key="sample_pituitary"):
-                st.session_state.selected_scan_bytes = create_localhost_sample_scan("pituitary")
+        with sc3:
+            if st.button("🧠 Pituitary", key="btn_sample_pituitary"):
+                st.session_state.selected_scan_bytes = generate_sample_mri("pituitary")
                 st.session_state.selected_scan_name = "sample_pituitary_mri.png"
                 st.session_state.analysis_results = None
                 st.rerun()
-        with s_col4:
-            if st.button("🧠 No Tumor", key="sample_normal"):
-                st.session_state.selected_scan_bytes = create_localhost_sample_scan("normal")
+        with sc4:
+            if st.button("🧠 No Tumor", key="btn_sample_normal"):
+                st.session_state.selected_scan_bytes = generate_sample_mri("normal")
                 st.session_state.selected_scan_name = "sample_normal_mri.png"
                 st.session_state.analysis_results = None
                 st.rerun()
@@ -584,66 +665,63 @@ elif st.session_state.active_nav == "Diagnostic Suite":
         if st.session_state.selected_scan_bytes is not None:
             st.image(
                 st.session_state.selected_scan_bytes,
-                caption=f"Scan: {st.session_state.selected_scan_name}",
+                caption=f"Scan File: {st.session_state.selected_scan_name}",
                 use_container_width=True
             )
-            meta_col1, meta_col2 = st.columns([3, 1])
-            with meta_col1:
+            col_kb, col_btn = st.columns([3, 1])
+            with col_kb:
                 kb_size = round(len(st.session_state.selected_scan_bytes) / 1024, 1)
                 st.caption(f"**Size:** {kb_size} KB | **Status:** 🟢 Loaded & Ready")
-            with meta_col2:
-                if st.button("Remove", key="btn_remove_scan"):
+            with col_btn:
+                if st.button("Remove", key="btn_clear_scan"):
                     st.session_state.selected_scan_bytes = None
                     st.session_state.selected_scan_name = None
                     st.session_state.analysis_results = None
                     st.rerun()
 
             # Dynamic Action Button
-            btn_text = f"▶ Run {st.session_state.pipeline_mode} Analysis"
-            if st.button(btn_text, key="btn_run_main_analysis"):
-                with st.spinner("Executing neural inference & computing Explainable AI heatmaps..."):
-                    # Save temporary file for OpenCV pipeline
+            btn_title = f"▶ Run {st.session_state.pipeline_mode} Analysis"
+            if st.button(btn_title, key="btn_execute_analysis"):
+                with st.spinner("Analyzing MRI slice and computing neural activation heatmaps..."):
                     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
                     os.makedirs(Config.SEGMENT_FOLDER, exist_ok=True)
-                    temp_scan_path = os.path.join(Config.UPLOAD_FOLDER, "temp_current_scan.png")
-                    with open(temp_scan_path, "wb") as f:
+                    temp_file_path = os.path.join(Config.UPLOAD_FOLDER, "temp_current_scan.png")
+                    with open(temp_file_path, "wb") as f:
                         f.write(st.session_state.selected_scan_bytes)
 
-                    # 1. Classification & Grad-CAM
+                    # 1. Classification & Grad-CAM Heatmap
                     pred_class, conf, probs = None, None, None
-                    gradcam_map, gradcam_overlay = None, None
-                    
+                    gradcam_overlay = None
                     if "Classification" in st.session_state.pipeline_mode or "Dual" in st.session_state.pipeline_mode:
-                        c_tensor, raw_c = preprocess_for_classification(temp_scan_path)
-                        pred_class, conf, probs = classifier_engine.predict(
+                        c_tensor, raw_c = preprocess_for_classification(temp_file_path)
+                        pred_class, conf, probs = classifier_model.predict(
                             c_tensor, raw_c, filename=st.session_state.selected_scan_name
                         )
-                        gradcam_map = generate_gradcam_heatmap(classifier_engine, c_tensor, raw_c)
+                        gradcam_map = generate_gradcam_heatmap(classifier_model, c_tensor, raw_c)
                         _, gradcam_overlay = overlay_heatmap_on_image(
-                            temp_scan_path, gradcam_map, alpha=0.45, colormap_name="JET"
+                            temp_file_path, gradcam_map, alpha=0.45, colormap_name="JET"
                         )
 
-                    # 2. Segmentation & Probability Density
+                    # 2. Segmentation & Continuous Probability Density Heatmap
                     mask, overlay_path, tumor_px, tumor_pct = None, None, 0, 0.0
-                    prob_map, prob_overlay = None, None
-
+                    prob_overlay = None
                     if "Segmentation" in st.session_state.pipeline_mode or "Dual" in st.session_state.pipeline_mode:
-                        s_tensor, raw_s = preprocess_for_segmentation(temp_scan_path)
-                        mask = segmenter_engine.predict_mask(s_tensor, raw_s)
+                        s_tensor, raw_s = preprocess_for_segmentation(temp_file_path)
+                        mask = segmenter_model.predict_mask(s_tensor, raw_s)
                         overlay_path = os.path.join(Config.SEGMENT_FOLDER, "temp_stream_overlay.png")
-                        tumor_px, tumor_pct = generate_color_overlay(temp_scan_path, mask, overlay_path)
+                        tumor_px, tumor_pct = generate_color_overlay(temp_file_path, mask, overlay_path)
                         
-                        prob_map = segmenter_engine.predict_probability_map(s_tensor, raw_s)
+                        prob_map = segmenter_model.predict_probability_map(s_tensor, raw_s)
                         _, prob_overlay = overlay_heatmap_on_image(
-                            temp_scan_path, prob_map, alpha=0.45, colormap_name="TURBO"
+                            temp_file_path, prob_map, alpha=0.45, colormap_name="TURBO"
                         )
 
-                    # 3. Record in SQLite Database
-                    user_id = st.session_state.user.get("id") if st.session_state.user else 1
+                    # 3. Save Record to SQLite database.db
+                    user_id = st.session_state.user.get("id", 1) if st.session_state.user else 1
                     upload_id = record_upload(
                         user_id,
                         st.session_state.selected_scan_name,
-                        temp_scan_path,
+                        temp_file_path,
                         len(st.session_state.selected_scan_bytes)
                     )
                     record_prediction(
@@ -651,12 +729,12 @@ elif st.session_state.active_nav == "Diagnostic Suite":
                         model_type=st.session_state.pipeline_mode,
                         predicted_class=pred_class,
                         confidence_score=conf,
-                        mask_path="static/segmented/temp_stream_mask.png",
+                        mask_path="static/segmented/temp_mask.png",
                         overlay_path=overlay_path,
                         tumor_percentage=tumor_pct,
                         tumor_area_px=tumor_px
                     )
-                    log_action(user_id, "ANALYZE_STREAMLIT", f"Analyzed {st.session_state.selected_scan_name}: {pred_class}")
+                    log_action(user_id, "ANALYZE_SCAN", f"Analyzed {st.session_state.selected_scan_name}: {pred_class}")
 
                     st.session_state.analysis_results = {
                         "pred_class": pred_class,
@@ -668,14 +746,14 @@ elif st.session_state.active_nav == "Diagnostic Suite":
                         "overlay_path": overlay_path,
                         "gradcam_overlay": gradcam_overlay,
                         "prob_overlay": prob_overlay,
-                        "temp_scan_path": temp_scan_path
+                        "temp_file_path": temp_file_path
                     }
                     st.rerun()
         else:
             st.info("👆 Drop a brain scan above or click one of the **Example MRI Scans** to begin.")
 
     # RIGHT PANEL: DIAGNOSTIC OUTPUT & VISUALIZATIONS
-    with col_output:
+    with grid_right:
         st.markdown("""
         <div class="card-header-row">
             <div class="card-header-title">
@@ -688,10 +766,10 @@ elif st.session_state.active_nav == "Diagnostic Suite":
         </div>
         """, unsafe_allow_html=True)
 
-        res = st.session_state.analysis_results
+        results = st.session_state.analysis_results
 
-        # INITIAL EMPTY STATE PLACEHOLDER (MATCHING LOCALHOST)
-        if res is None:
+        # INITIAL EMPTY PLACEHOLDER (EXACT MATCH)
+        if results is None:
             st.markdown("""
             <div class="empty-state-box">
                 <div class="empty-icon-circle">🔬</div>
@@ -708,121 +786,115 @@ elif st.session_state.active_nav == "Diagnostic Suite":
             """, unsafe_allow_html=True)
 
         else:
-            # TABS: CLINICAL STAGES & EXPLAINABLE AI HEATMAPS
-            tab_stages, tab_gradcam, tab_probmap, tab_comparison = st.tabs([
+            # CLINICAL STAGE VISUALIZATION & HEATMAP TABS
+            tab_stage_view, tab_gradcam_view, tab_prob_view, tab_multi_view = st.tabs([
                 "🖼️ Clinical MRI Stages",
                 "🔥 Grad-CAM Attention Heatmap",
                 "🌊 Probability Density Heatmap",
-                "🔍 4-Panel Comparison"
+                "🔍 4-Panel Multi-Modal Synthesis"
             ])
 
-            # Tab 1: 3-Stage MRI Grid
-            with tab_stages:
-                stage_c1, stage_c2, stage_c3 = st.columns(3)
-                with stage_c1:
+            with tab_stage_view:
+                st1, st2, st3 = st.columns(3)
+                with st1:
                     st.markdown('<div class="stage-card-box"><div class="stage-card-label">1. Original MRI</div>', unsafe_allow_html=True)
-                    st.image(res["temp_scan_path"], use_container_width=True)
+                    st.image(results["temp_file_path"], use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
-
-                with stage_c2:
+                with st2:
                     st.markdown('<div class="stage-card-box"><div class="stage-card-label">2. Binary Mask (U-Net)</div>', unsafe_allow_html=True)
-                    if res["mask"] is not None:
-                        st.image(res["mask"], use_container_width=True)
+                    if results["mask"] is not None:
+                        st.image(results["mask"], use_container_width=True)
                     else:
-                        st.caption("Segmentation omitted in Classification mode")
+                        st.caption("Omitted in Classification mode")
                     st.markdown('</div>', unsafe_allow_html=True)
-
-                with stage_c3:
+                with st3:
                     st.markdown('<div class="stage-card-box"><div class="stage-card-label">3. Tumor Overlay</div>', unsafe_allow_html=True)
-                    if res["overlay_path"] is not None and os.path.exists(res["overlay_path"]):
-                        st.image(res["overlay_path"], use_container_width=True)
+                    if results["overlay_path"] is not None and os.path.exists(results["overlay_path"]):
+                        st.image(results["overlay_path"], use_container_width=True)
                     else:
-                        st.caption("Segmentation omitted in Classification mode")
+                        st.caption("Omitted in Classification mode")
                     st.markdown('</div>', unsafe_allow_html=True)
 
-            # Tab 2: Grad-CAM Attention Heatmap
-            with tab_gradcam:
-                st.markdown("#### 🔥 Grad-CAM Activation Heatmap (Explainable AI)")
+            with tab_gradcam_view:
+                st.markdown("#### 🔥 Grad-CAM Class Activation Mapping (Explainable AI)")
                 st.caption("Visualizes the high-attention convolutional gradients driving the VGG16 classification decision.")
-                if res["gradcam_overlay"] is not None:
-                    g_c1, g_c2 = st.columns([1, 1])
-                    with g_c1:
-                        st.image(res["temp_scan_path"], caption="Original Anatomical Scan", use_container_width=True)
-                    with g_c2:
-                        st.image(res["gradcam_overlay"], caption="Superimposed Grad-CAM Heatmap (JET)", use_container_width=True)
+                if results["gradcam_overlay"] is not None:
+                    gc1, gc2 = st.columns([1, 1])
+                    with gc1:
+                        st.image(results["temp_file_path"], caption="Original Anatomical Scan", use_container_width=True)
+                    with gc2:
+                        st.image(results["gradcam_overlay"], caption="Superimposed Grad-CAM Heatmap (JET)", use_container_width=True)
                 else:
-                    st.info("Grad-CAM generated in Dual or Classification mode.")
+                    st.info("Grad-CAM is generated in Dual Pipeline or Classification mode.")
 
-            # Tab 3: Probability Density Heatmap
-            with tab_probmap:
+            with tab_prob_view:
                 st.markdown("#### 🌊 Continuous Tumor Probability Density (U-Net)")
                 st.caption("Plots the continuous sigmoid confidence gradient from 0% to 100%, exposing infiltrative borders.")
-                if res["prob_overlay"] is not None:
-                    p_c1, p_c2 = st.columns([1, 1])
-                    with p_c1:
-                        st.image(res["temp_scan_path"], caption="Original Anatomical Scan", use_container_width=True)
-                    with p_c2:
-                        st.image(res["prob_overlay"], caption="Tumor Probability Density Overlay (TURBO)", use_container_width=True)
+                if results["prob_overlay"] is not None:
+                    pc1, pc2 = st.columns([1, 1])
+                    with pc1:
+                        st.image(results["temp_file_path"], caption="Original Anatomical Scan", use_container_width=True)
+                    with pc2:
+                        st.image(results["prob_overlay"], caption="Tumor Probability Density Overlay (TURBO)", use_container_width=True)
                 else:
-                    st.info("Probability density generated in Dual or Segmentation mode.")
+                    st.info("Probability density is generated in Dual Pipeline or Segmentation mode.")
 
-            # Tab 4: 4-Panel Comparison
-            with tab_comparison:
-                st.markdown("#### 🔍 Multi-Modal Diagnostic Synthesis")
-                cp1, cp2, cp3, cp4 = st.columns(4)
-                with cp1:
-                    st.image(res["temp_scan_path"], caption="1. Anatomical MRI", use_container_width=True)
-                with cp2:
-                    if res["gradcam_overlay"] is not None:
-                        st.image(res["gradcam_overlay"], caption="2. VGG16 Grad-CAM", use_container_width=True)
-                with cp3:
-                    if res["prob_overlay"] is not None:
-                        st.image(res["prob_overlay"], caption="3. U-Net Density", use_container_width=True)
-                with cp4:
-                    if res["overlay_path"] is not None and os.path.exists(res["overlay_path"]):
-                        st.image(res["overlay_path"], caption="4. Delineated Contour", use_container_width=True)
+            with tab_multi_view:
+                st.markdown("#### 🔍 Complete Multi-Modal Diagnostic Synthesis")
+                m1, m2, m3, m4 = st.columns(4)
+                with m1:
+                    st.image(results["temp_file_path"], caption="1. Anatomical MRI", use_container_width=True)
+                with m2:
+                    if results["gradcam_overlay"] is not None:
+                        st.image(results["gradcam_overlay"], caption="2. VGG16 Grad-CAM", use_container_width=True)
+                with m3:
+                    if results["prob_overlay"] is not None:
+                        st.image(results["prob_overlay"], caption="3. U-Net Density", use_container_width=True)
+                with m4:
+                    if results["overlay_path"] is not None and os.path.exists(results["overlay_path"]):
+                        st.image(results["overlay_path"], caption="4. Delineated Contour", use_container_width=True)
 
-            # DIAGNOSTIC METRICS CARDS (EXACT MATCH)
-            p_class = res["pred_class"] or "N/A"
-            conf_pct = f"{round(res['conf']*100, 1)}%" if res["conf"] is not None else "N/A"
-            area_px = f"{res['tumor_px']} px" if res["tumor_px"] is not None else "N/A"
-            cov_pct = f"{res['tumor_pct']}%" if res["tumor_pct"] is not None else "N/A"
+            # 4 METRIC TILES (EXACT LOCALHOST MATCH)
+            p_cls = results["pred_class"] or "N/A"
+            c_pct = f"{round(results['conf']*100, 1)}%" if results["conf"] is not None else "N/A"
+            a_px = f"{results['tumor_px']} px" if results["tumor_px"] is not None else "N/A"
+            t_pct = f"{results['tumor_pct']}%" if results["tumor_pct"] is not None else "N/A"
 
             st.markdown(f"""
             <div class="metric-grid-4">
                 <div class="metric-tile">
                     <div class="metric-tile-title">Predicted Class</div>
-                    <div class="metric-tile-val val-indigo">{p_class}</div>
+                    <div class="metric-tile-val val-indigo">{p_cls}</div>
                 </div>
                 <div class="metric-tile">
                     <div class="metric-tile-title">Confidence</div>
-                    <div class="metric-tile-val val-indigo">{conf_pct}</div>
+                    <div class="metric-tile-val val-indigo">{c_pct}</div>
                 </div>
                 <div class="metric-tile">
                     <div class="metric-tile-title">Tumor Coverage</div>
-                    <div class="metric-tile-val val-teal">{cov_pct}</div>
+                    <div class="metric-tile-val val-teal">{t_pct}</div>
                 </div>
                 <div class="metric-tile">
                     <div class="metric-tile-title">Pixel Area</div>
-                    <div class="metric-tile-val val-teal">{area_px}</div>
+                    <div class="metric-tile-val val-teal">{a_px}</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
             # VGG16 CLASS PROBABILITY BREAKDOWN
-            if res["probs"]:
+            if results["probs"]:
                 st.markdown("#### 🏷️ VGG16 Class Probability Breakdown")
-                for cls_name, cls_prob in res["probs"].items():
-                    bar_col1, bar_col2 = st.columns([5, 1])
-                    with bar_col1:
-                        st.progress(float(cls_prob) / 100.0, text=f"{cls_name}")
-                    with bar_col2:
-                        st.write(f"**{cls_prob}%**")
+                for c_name, c_val in results["probs"].items():
+                    p1, p2 = st.columns([5, 1])
+                    with p1:
+                        st.progress(float(c_val) / 100.0, text=f"{c_name}")
+                    with p2:
+                        st.write(f"**{c_val}%**")
 
             st.caption("🔬 **Architecture:** VGG16 Transfer Learning & Deep U-Net Segmentation | Clinical Decision Support System")
 
 # ----------------------------------------------------
-# VIEW 3: CLINICAL ANALYTICS DASHBOARD
+# VIEW B: CLINICAL ANALYTICS
 # ----------------------------------------------------
 elif st.session_state.active_nav == "Analytics":
     st.markdown("""
@@ -834,46 +906,46 @@ elif st.session_state.active_nav == "Analytics":
     </div>
     """, unsafe_allow_html=True)
 
-    analytics_data = get_dashboard_analytics()
-    total_scans = analytics_data.get("total_scans", 0)
-    total_classifications = analytics_data.get("total_classifications", 0)
-    total_segmentations = analytics_data.get("total_segmentations", 0)
-    avg_conf = f"{analytics_data.get('avg_confidence', 0)}%"
-    class_dist = analytics_data.get("class_distribution", {})
+    analytics = get_dashboard_analytics()
+    scans_num = analytics.get("total_scans", 0)
+    class_num = analytics.get("total_classifications", 0)
+    seg_num = analytics.get("total_segmentations", 0)
+    avg_confidence_val = f"{analytics.get('avg_confidence', 0)}%"
+    cat_dist = analytics.get("class_distribution", {})
 
     st.markdown(f"""
     <div class="metric-grid-4">
         <div class="metric-tile">
             <div class="metric-tile-title">Total Scans Processed</div>
-            <div class="metric-tile-val" style="color: #2767A8;">{total_scans}</div>
+            <div class="metric-tile-val" style="color: #2767A8;">{scans_num}</div>
         </div>
         <div class="metric-tile">
             <div class="metric-tile-title">Classifications Logged</div>
-            <div class="metric-tile-val val-indigo">{total_classifications}</div>
+            <div class="metric-tile-val val-indigo">{class_num}</div>
         </div>
         <div class="metric-tile">
             <div class="metric-tile-title">Segmentations Executed</div>
-            <div class="metric-tile-val val-teal">{total_segmentations}</div>
+            <div class="metric-tile-val val-teal">{seg_num}</div>
         </div>
         <div class="metric-tile">
             <div class="metric-tile-title">Avg Model Confidence</div>
-            <div class="metric-tile-val val-success">{avg_conf}</div>
+            <div class="metric-tile-val val-success">{avg_confidence_val}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     st.write("")
     st.markdown("### 📊 Tumor Category Distribution Breakdown")
-    for category, count in class_dist.items():
-        pct = round((count / max(1, total_scans)) * 100, 1)
-        c_col1, c_col2 = st.columns([5, 1])
-        with c_col1:
-            st.progress(pct / 100.0, text=f"{category} ({count} scans)")
-        with c_col2:
-            st.write(f"**{pct}%**")
+    for cat_name, cat_count in cat_dist.items():
+        ratio = round((cat_count / max(1, scans_num)) * 100, 1)
+        r1, r2 = st.columns([5, 1])
+        with r1:
+            st.progress(ratio / 100.0, text=f"{cat_name} ({cat_count} scans)")
+        with r2:
+            st.write(f"**{ratio}%**")
 
 # ----------------------------------------------------
-# VIEW 4: AUDIT LOG HISTORY TABLE
+# VIEW C: AUDIT LOG HISTORY TABLE
 # ----------------------------------------------------
 elif st.session_state.active_nav == "Audit Log":
     st.markdown("""
@@ -885,22 +957,22 @@ elif st.session_state.active_nav == "Audit Log":
     </div>
     """, unsafe_allow_html=True)
 
-    records = get_history_records(limit=100)
-    if records:
-        table_rows = []
-        for r in records:
-            conf_val = f"{round(float(r['confidence_score'])*100, 1)}%" if r['confidence_score'] is not None else "--"
-            cov_val = f"{r['tumor_percentage']}%" if r['tumor_percentage'] is not None else "--"
-            table_rows.append({
-                "Record ID": f"#{r['id']}",
-                "Clinician": r.get('doctor_name') or "Dr. Sapna",
-                "Scan File": r.get('filename') or "MRI_Scan.png",
-                "Model Pipeline": r.get('model_type'),
-                "Diagnosis": r.get('predicted_class') or "Segmented",
-                "Confidence": conf_val,
-                "Tumor Coverage": cov_val,
-                "Timestamp": str(r.get('timestamp'))[:19]
+    hist_records = get_history_records(limit=100)
+    if hist_records:
+        history_list = []
+        for row in hist_records:
+            conf_str = f"{round(float(row['confidence_score'])*100, 1)}%" if row['confidence_score'] is not None else "--"
+            cov_str = f"{row['tumor_percentage']}%" if row['tumor_percentage'] is not None else "--"
+            history_list.append({
+                "Record ID": f"#{row['id']}",
+                "Clinician": row.get('doctor_name') or "Dr. Sapna",
+                "Scan File": row.get('filename') or "MRI_Scan.png",
+                "Model Pipeline": row.get('model_type'),
+                "Diagnosis": row.get('predicted_class') or "Segmented",
+                "Confidence": conf_str,
+                "Tumor Coverage": cov_str,
+                "Timestamp": str(row.get('timestamp'))[:19]
             })
-        st.dataframe(table_rows, use_container_width=True)
+        st.dataframe(history_list, use_container_width=True)
     else:
         st.info("No audit records found yet. Analyzed scans will appear here automatically.")
