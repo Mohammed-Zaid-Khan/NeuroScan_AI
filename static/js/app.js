@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentMode = 'dual'; // 'dual', 'classify', 'segment'
   let selectedFile = null;
   let isRegistering = false;
+  let latestAnalysisData = null;
 
   // DOM Elements - Auth & App Shell
   const appLoadingScreen = document.getElementById('appLoadingScreen');
@@ -463,12 +464,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const sampleChips = document.querySelectorAll('.sample-chip');
   sampleChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      sampleChips.forEach(c => c.classList.remove('selected'));
+      sampleChips.forEach(c => {
+        c.classList.remove('selected');
+        c.classList.remove('active');
+      });
       chip.classList.add('selected');
+      chip.classList.add('active');
       const type = chip.dataset.sample;
-      generateSampleMriScan(type);
+      loadSampleMriScan(type);
     });
   });
+
+  async function loadSampleMriScan(type) {
+    try {
+      const res = await fetch(`/static/samples/${type}.png`);
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      const blob = await res.blob();
+      const file = new File([blob], `${type}_axial_scan.png`, { type: 'image/png' });
+      const dataUrl = URL.createObjectURL(blob);
+      handleFileSelected(file, dataUrl);
+    } catch (err) {
+      console.warn('Loading fallback generated sample:', err);
+      generateSampleMriScan(type);
+    }
+  }
 
   function generateSampleMriScan(type) {
     const canvas = document.createElement('canvas');
@@ -661,15 +680,34 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    latestAnalysisData = data;
+
     if (data.tumor_percentage !== undefined) {
       if (tumorPctBadge) tumorPctBadge.textContent = `${data.tumor_percentage}%`;
-      if (tumorAreaBadge) tumorAreaBadge.textContent = `${(data.tumor_area_pixels || 0).toLocaleString()} px`;
+      const px = data.tumor_area_pixels || 0;
+      const cm2 = (px * 0.01).toFixed(2);
+      if (tumorAreaBadge) tumorAreaBadge.textContent = `${px.toLocaleString()} px`;
+      const areaSub = document.querySelector('#tumorAreaCard .metric-subtext');
+      if (areaSub) areaSub.textContent = `~${cm2} cm² physical est.`;
     }
+
+    // Populate split curtain images
+    const curtainUnder = document.getElementById('curtainUnderImg');
+    const curtainOver = document.getElementById('curtainOverImg');
+    if (curtainUnder && data.original_image_url) curtainUnder.src = data.original_image_url;
+    if (curtainOver) {
+      curtainOver.src = data.overlay_image_url || data.gradcam_image_url || data.density_heatmap_url || data.original_image_url;
+    }
+
+    // Reveal Clinical Report button
+    const btnOpenReportModal = document.getElementById('btnOpenReportModal');
+    if (btnOpenReportModal) btnOpenReportModal.style.display = 'inline-flex';
   }
 
   // Visualization Mode Switcher Tabs
   const visTabBtns = document.querySelectorAll('.vis-tab-btn');
   const mainStageGrid = document.getElementById('mainStageGrid');
+  const splitCompareView = document.getElementById('splitCompareView');
 
   visTabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -683,8 +721,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const overlayBox = document.getElementById('overlayStageBox');
       const origBox = document.getElementById('origStageBox');
 
-      if (!mainStageGrid) return;
-      mainStageGrid.classList.remove('grid-focus-2', 'grid-focus-3', 'grid-focus-5');
+      if (view === 'compare') {
+        if (mainStageGrid) mainStageGrid.style.display = 'none';
+        if (splitCompareView) splitCompareView.style.display = 'block';
+        return;
+      }
+
+      if (splitCompareView) splitCompareView.style.display = 'none';
+      if (mainStageGrid) {
+        mainStageGrid.style.display = 'grid';
+        mainStageGrid.classList.remove('grid-focus-2', 'grid-focus-3', 'grid-focus-5');
+      }
 
       if (view === 'gradcam') {
         if (origBox) origBox.style.display = 'flex';
@@ -692,21 +739,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (densityBox) densityBox.style.display = 'none';
         if (maskBox) maskBox.style.display = 'none';
         if (overlayBox) overlayBox.style.display = 'none';
-        mainStageGrid.classList.add('grid-focus-2');
+        if (mainStageGrid) mainStageGrid.classList.add('grid-focus-2');
       } else if (view === 'density') {
         if (origBox) origBox.style.display = 'flex';
         if (gradcamBox) gradcamBox.style.display = 'none';
         if (densityBox) densityBox.style.display = 'flex';
         if (maskBox) maskBox.style.display = 'none';
         if (overlayBox) overlayBox.style.display = 'none';
-        mainStageGrid.classList.add('grid-focus-2');
+        if (mainStageGrid) mainStageGrid.classList.add('grid-focus-2');
       } else if (view === 'stages') {
         if (origBox) origBox.style.display = 'flex';
         if (gradcamBox) gradcamBox.style.display = 'none';
         if (densityBox) densityBox.style.display = 'none';
         if (maskBox) maskBox.style.display = 'flex';
         if (overlayBox) overlayBox.style.display = 'flex';
-        mainStageGrid.classList.add('grid-focus-3');
+        if (mainStageGrid) mainStageGrid.classList.add('grid-focus-3');
       } else {
         // 'all'
         if (origBox) origBox.style.display = 'flex';
@@ -714,10 +761,122 @@ document.addEventListener('DOMContentLoaded', () => {
         if (densityBox) densityBox.style.display = 'flex';
         if (maskBox) maskBox.style.display = 'flex';
         if (overlayBox) overlayBox.style.display = 'flex';
-        mainStageGrid.classList.add('grid-focus-5');
+        if (mainStageGrid) mainStageGrid.classList.add('grid-focus-5');
       }
     });
   });
+
+  // Interactive Split Curtain Dragging
+  const curtainWrapper = document.getElementById('curtainWrapper');
+  let isDraggingCurtain = false;
+
+  function updateCurtainPosition(clientX) {
+    if (!curtainWrapper) return;
+    const rect = curtainWrapper.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const pct = Math.max(2, Math.min(98, (x / rect.width) * 100));
+    curtainWrapper.style.setProperty('--curtain-split', `${pct}%`);
+  }
+
+  if (curtainWrapper) {
+    curtainWrapper.addEventListener('mousedown', (e) => {
+      isDraggingCurtain = true;
+      updateCurtainPosition(e.clientX);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingCurtain) updateCurtainPosition(e.clientX);
+    });
+    window.addEventListener('mouseup', () => {
+      isDraggingCurtain = false;
+    });
+
+    curtainWrapper.addEventListener('touchstart', (e) => {
+      isDraggingCurtain = true;
+      if (e.touches.length > 0) updateCurtainPosition(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (isDraggingCurtain && e.touches.length > 0) updateCurtainPosition(e.touches[0].clientX);
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+      isDraggingCurtain = false;
+    });
+  }
+
+  // Clinical Diagnostic Report Modal Wiring
+  const btnOpenReportModal = document.getElementById('btnOpenReportModal');
+  const clinicalReportModal = document.getElementById('clinicalReportModal');
+  const closeReportModal = document.getElementById('closeReportModal');
+  const btnPrintReport = document.getElementById('btnPrintReport');
+
+  if (btnOpenReportModal) {
+    btnOpenReportModal.addEventListener('click', () => {
+      if (!latestAnalysisData) return;
+      const d = latestAnalysisData;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      const reportDateVal = document.getElementById('reportDateVal');
+      if (reportDateVal) reportDateVal.textContent = dateStr;
+
+      const reportScanNameVal = document.getElementById('reportScanNameVal');
+      if (reportScanNameVal) {
+        reportScanNameVal.textContent = (selectedFile && selectedFile.name) ? selectedFile.name : 'Brain_MRI_Axial.png';
+      }
+
+      const reportDiagnosisHeading = document.getElementById('reportDiagnosisHeading');
+      const reportDiagnosisParagraph = document.getElementById('reportDiagnosisParagraph');
+      if (reportDiagnosisHeading) {
+        if (d.predicted_class && d.predicted_class !== 'No Tumor') {
+          reportDiagnosisHeading.textContent = `${d.predicted_class} Pathology Confirmed (${d.confidence_score}%)`;
+          reportDiagnosisHeading.style.color = '#B91C1C';
+          if (reportDiagnosisParagraph) {
+            reportDiagnosisParagraph.textContent = `Deep convolutional analysis (VGG16) identified a ${d.predicted_class} lesion with ${d.confidence_score}% probability certainty. Pixel-level U-Net segmenter confirmed focal delineation with quantitative boundary segmentation.`;
+          }
+        } else {
+          reportDiagnosisHeading.textContent = 'No Neoplasm Detected (Healthy Brain MRI)';
+          reportDiagnosisHeading.style.color = '#15803D';
+          if (reportDiagnosisParagraph) {
+            reportDiagnosisParagraph.textContent = 'Deep convolutional inference indicates normal anatomical cranial morphology with no signs of pathological mass or abnormal focal enhancement.';
+          }
+        }
+      }
+
+      const reportOrigImg = document.getElementById('reportOrigImg');
+      const reportGradcamImg = document.getElementById('reportGradcamImg');
+      const reportOverlayImg = document.getElementById('reportOverlayImg');
+
+      if (reportOrigImg) reportOrigImg.src = d.original_image_url || '';
+      if (reportGradcamImg) reportGradcamImg.src = d.gradcam_image_url || d.original_image_url || '';
+      if (reportOverlayImg) reportOverlayImg.src = d.overlay_image_url || d.density_heatmap_url || d.original_image_url || '';
+
+      const reportTableClass = document.getElementById('reportTableClass');
+      const reportTableConf = document.getElementById('reportTableConf');
+      const reportTableArea = document.getElementById('reportTableArea');
+      const reportTablePct = document.getElementById('reportTablePct');
+
+      if (reportTableClass) reportTableClass.textContent = d.predicted_class || 'Dual Pipeline';
+      if (reportTableConf) reportTableConf.textContent = d.confidence_score ? `${d.confidence_score}%` : 'N/A';
+      const px = d.tumor_area_pixels || 0;
+      const cm2 = (px * 0.01).toFixed(2);
+      if (reportTableArea) reportTableArea.textContent = `${px.toLocaleString()} px (~${cm2} cm²)`;
+      if (reportTablePct) reportTablePct.textContent = d.tumor_percentage !== undefined ? `${d.tumor_percentage}%` : 'N/A';
+
+      if (clinicalReportModal) clinicalReportModal.classList.add('open');
+    });
+  }
+
+  if (closeReportModal) {
+    closeReportModal.addEventListener('click', () => {
+      if (clinicalReportModal) clinicalReportModal.classList.remove('open');
+    });
+  }
+
+  if (btnPrintReport) {
+    btnPrintReport.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
 
   if (opacitySlider) {
     opacitySlider.addEventListener('input', (e) => {

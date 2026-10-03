@@ -324,26 +324,40 @@
                     </button>
                   </div>
                 </div>
-              </div>
-
-              <!-- REFINED SAMPLE SCANS MODULE -->
+               <!-- REFINED SAMPLE SCANS MODULE -->
               <div class="sample-scans-panel">
                 <div class="sample-title-row">
                   <span class="sample-title">Example MRI Scans</span>
-                  <span class="sample-subtitle">Load a sample to test the pipeline</span>
+                  <span class="sample-subtitle">Select a clinical case to run inference</span>
                 </div>
                 <div class="sample-chips-grid">
                   <button type="button" class="sample-chip" data-sample="glioma">
-                    <i class="fas fa-brain"></i> Glioma
+                    <div class="sample-icon-wrapper cap-indigo"><i class="fas fa-brain"></i></div>
+                    <div class="sample-chip-text">
+                      <strong>Glioma</strong>
+                      <span>Infiltrative glial lesion</span>
+                    </div>
                   </button>
                   <button type="button" class="sample-chip" data-sample="meningioma">
-                    <i class="fas fa-brain"></i> Meningioma
+                    <div class="sample-icon-wrapper cap-teal"><i class="fas fa-brain"></i></div>
+                    <div class="sample-chip-text">
+                      <strong>Meningioma</strong>
+                      <span>Dural extra-axial tumor</span>
+                    </div>
                   </button>
                   <button type="button" class="sample-chip" data-sample="pituitary">
-                    <i class="fas fa-brain"></i> Pituitary
+                    <div class="sample-icon-wrapper cap-blue"><i class="fas fa-brain"></i></div>
+                    <div class="sample-chip-text">
+                      <strong>Pituitary</strong>
+                      <span>Sellar region adenoma</span>
+                    </div>
                   </button>
                   <button type="button" class="sample-chip" data-sample="normal">
-                    <i class="fas fa-brain"></i> No Tumor
+                    <div class="sample-icon-wrapper cap-green"><i class="fas fa-shield-alt"></i></div>
+                    <div class="sample-chip-text">
+                      <strong>No Tumor</strong>
+                      <span>Healthy axial scan</span>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -366,9 +380,14 @@
                 <i class="fas fa-chart-pie title-icon"></i>
                 <h2>Diagnostic Output & Visualizations</h2>
               </div>
-              <div class="live-inference-badge">
-                <span class="pulse-live"></span>
-                <span>Live inference</span>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <button type="button" class="btn-report-export" id="btnOpenReportModal" style="display: none;">
+                  <i class="fas fa-file-medical-alt"></i> Clinical Report
+                </button>
+                <div class="live-inference-badge">
+                  <span class="pulse-live"></span>
+                  <span>Live inference</span>
+                </div>
               </div>
             </div>
 
@@ -406,10 +425,13 @@
                 <!-- VISUALIZATION TABS / VIEW SWITCHER -->
                 <div class="vis-tab-row" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.15rem; border-bottom: 1px solid var(--border-default); padding-bottom: 0.65rem;">
                   <button type="button" class="vis-tab-btn active" data-view="all" id="visTabAll">
-                    <i class="fas fa-th-large"></i> All Visualizations (5-Stage)
+                    <i class="fas fa-th-large"></i> Multi-Panel (5-Stage)
+                  </button>
+                  <button type="button" class="vis-tab-btn" data-view="compare" id="visTabCompare">
+                    <i class="fas fa-columns"></i> Split Curtain Compare
                   </button>
                   <button type="button" class="vis-tab-btn" data-view="gradcam" id="visTabGradcam">
-                    <i class="fas fa-fire"></i> Grad-CAM Heatmap (JET)
+                    <i class="fas fa-fire"></i> Grad-CAM Attention (JET)
                   </button>
                   <button type="button" class="vis-tab-btn" data-view="density" id="visTabDensity">
                     <i class="fas fa-water"></i> Probability Density (TURBO)
@@ -417,6 +439,23 @@
                   <button type="button" class="vis-tab-btn" data-view="stages" id="visTabStages">
                     <i class="fas fa-layer-group"></i> Clinical Stages
                   </button>
+                </div>
+
+                <!-- INTERACTIVE BEFORE/AFTER SPLIT-CURTAIN COMPARISON SLIDER -->
+                <div id="splitCompareView" class="split-compare-container" style="display: none; margin-bottom: 1.5rem;">
+                  <div class="split-compare-wrapper" id="curtainWrapper">
+                    <img id="curtainUnderImg" class="curtain-img-under" src="" alt="Anatomical MRI Base">
+                    <div class="curtain-over-wrapper" id="curtainOverWrapper">
+                      <img id="curtainOverImg" class="curtain-img-over" src="" alt="Delineated Overlay Top">
+                    </div>
+                    <div class="curtain-divider-line" id="curtainDivider">
+                      <div class="curtain-handle"><i class="fas fa-arrows-alt-h"></i></div>
+                    </div>
+                  </div>
+                  <div class="curtain-labels">
+                    <span><i class="fas fa-eye"></i> Left: Anatomical MRI</span>
+                    <span><i class="fas fa-layer-group"></i> Right: Delineated Tumor / Heatmap</span>
+                  </div>
                 </div>
 
                 <!-- 5-STAGE MRI VISUALIZATION COMPARISON GRID -->
@@ -466,23 +505,42 @@
                   <input type="range" id="opacitySlider" min="0" max="100" value="100" class="custom-range-slider" aria-label="Tumor Overlay Opacity Blend">
                 </div>
 
-                <!-- DIAGNOSTIC METRIC CARDS -->
+                <!-- DIAGNOSTIC METRIC CARDS WITH PHYSICAL MEASUREMENTS -->
                 <div class="result-badge-container">
                   <div class="metric-card metric-classification" id="classMetricCard">
-                    <span class="metric-label">Predicted Class</span>
-                    <span class="metric-value text-indigo" id="classBadge">--</span>
+                    <div class="metric-icon-box text-indigo"><i class="fas fa-bullseye"></i></div>
+                    <div class="metric-content">
+                      <span class="metric-label">Predicted Class</span>
+                      <span class="metric-value text-indigo" id="classBadge">--</span>
+                      <span class="metric-subtext" id="classStatusSub">AI Pathology Classification</span>
+                    </div>
                   </div>
+
                   <div class="metric-card metric-classification" id="confMetricCard">
-                    <span class="metric-label">Confidence</span>
-                    <span class="metric-value text-indigo" id="confidenceBadge">--</span>
+                    <div class="metric-icon-box text-indigo"><i class="fas fa-gauge-high"></i></div>
+                    <div class="metric-content">
+                      <span class="metric-label">Confidence</span>
+                      <span class="metric-value text-indigo" id="confidenceBadge">--</span>
+                      <span class="metric-subtext" id="confStatusSub">VGG16 Neural Certainty</span>
+                    </div>
                   </div>
+
                   <div class="metric-card metric-segmentation" id="tumorPctCard">
-                    <span class="metric-label">Tumor Coverage</span>
-                    <span class="metric-value text-teal" id="tumorPctBadge">--</span>
+                    <div class="metric-icon-box text-teal"><i class="fas fa-chart-pie"></i></div>
+                    <div class="metric-content">
+                      <span class="metric-label">Tumor Coverage</span>
+                      <span class="metric-value text-teal" id="tumorPctBadge">--</span>
+                      <span class="metric-subtext" id="covStatusSub">Axial Slice Burden</span>
+                    </div>
                   </div>
+
                   <div class="metric-card metric-segmentation" id="tumorAreaCard">
-                    <span class="metric-label">Pixel Area</span>
-                    <span class="metric-value text-teal" id="tumorAreaBadge">--</span>
+                    <div class="metric-icon-box text-teal"><i class="fas fa-ruler-combined"></i></div>
+                    <div class="metric-content">
+                      <span class="metric-label">Tumor Area</span>
+                      <span class="metric-value text-teal" id="tumorAreaBadge">--</span>
+                      <span class="metric-subtext" id="tumorAreaCmBadge">~0.00 cm² physical est.</span>
+                    </div>
                   </div>
                 </div>
 
@@ -497,7 +555,7 @@
 
                 <!-- MODEL TECHNICAL METADATA FOOTNOTE -->
                 <div class="model-footnote">
-                  <span><i class="fas fa-microchip"></i> Architecture: <strong id="modelUsedFootnote">VGG16 Transfer Learning & U-Net Segmentation</strong></span>
+                  <span><i class="fas fa-microchip"></i> Architecture: <strong id="modelUsedFootnote">VGG16 Transfer Learning &amp; U-Net Segmentation</strong></span>
                   <span>Clinical Decision Support System</span>
                 </div>
 
@@ -629,6 +687,99 @@
       </div>
       <div class="modal-body text-center">
         <img id="inspectModalImg" src="" alt="Enlarged MRI View" style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 8px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- CLINICAL DIAGNOSTIC REPORT MODAL (PRINTABLE PDF) -->
+  <div class="modal-overlay" id="clinicalReportModal" aria-hidden="true">
+    <div class="modal-card modal-lg clinical-report-card">
+      <div class="modal-header report-modal-header">
+        <div class="report-header-brand">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="#2767A8"/>
+            <path d="M16 6C10.5 6 7 9.8 7 14.5C7 18 8.8 21 11.5 23.5V26H20.5V23.5C23.2 21 25 18 25 14.5C25 9.8 21.5 6 16 6Z" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 12H22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+            <path d="M9 16H23" stroke="#64B5F6" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M11 20H21" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+            <circle cx="18.5" cy="14.5" r="2" fill="#168C88" stroke="#FFFFFF" stroke-width="1"/>
+          </svg>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem; color: #172538;">NeuroScan AI · Clinical Diagnostic Report</h3>
+            <span style="font-size: 0.8rem; color: #64748B;">Automated Neuro-Radiology Deep Learning Evaluation</span>
+          </div>
+        </div>
+        <div class="report-header-actions no-print" style="display: flex; gap: 0.6rem; align-items: center;">
+          <button type="button" class="btn-print-report" id="btnPrintReport" style="background: #2767A8; color: #fff; border: none; padding: 0.45rem 0.9rem; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+            <i class="fas fa-print"></i> Print / Save PDF
+          </button>
+          <button type="button" class="modal-close" id="closeReportModal" aria-label="Close modal"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+      <div class="modal-body report-modal-body" id="reportPrintArea" style="padding: 1.5rem;">
+        <div class="report-meta-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; background: #F8FAFC; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 1.2rem; font-size: 0.85rem;">
+          <div><strong>Attending Clinician:</strong> Dr. Sapna (Radiology)</div>
+          <div><strong>Analysis Date:</strong> <span id="reportDateVal">--</span></div>
+          <div><strong>Scan Reference:</strong> <span id="reportScanNameVal">--</span></div>
+          <div><strong>Diagnostic Pipeline:</strong> VGG16 + U-Net CDSS</div>
+        </div>
+
+        <div class="report-summary-box" style="background: #EEF4FA; border-left: 4px solid #2767A8; padding: 0.9rem 1.1rem; border-radius: 6px; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #2767A8; letter-spacing: 0.5px;">Executive Finding</div>
+          <div style="font-size: 1.2rem; font-weight: 800; color: #172538; margin: 0.2rem 0;" id="reportDiagnosisHeading">Glioma Detected</div>
+          <p style="font-size: 0.88rem; color: #536579; margin: 0;" id="reportDiagnosisParagraph">Deep convolutional classification indicates a high-confidence finding with pixel-level segmentation identifying localized tumor volume.</p>
+        </div>
+
+        <div class="report-image-triptych" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.25rem;">
+          <div style="background: #0D1720; border-radius: 8px; padding: 0.5rem; text-align: center;">
+            <div style="font-size: 0.72rem; color: #9BB1C7; font-weight: 600; margin-bottom: 0.3rem;">1. Anatomical MRI</div>
+            <img id="reportOrigImg" src="" alt="Original MRI" style="max-width: 100%; border-radius: 4px;">
+          </div>
+          <div style="background: #0D1720; border-radius: 8px; padding: 0.5rem; text-align: center;">
+            <div style="font-size: 0.72rem; color: #9BB1C7; font-weight: 600; margin-bottom: 0.3rem;">2. Grad-CAM Attention</div>
+            <img id="reportGradcamImg" src="" alt="Grad-CAM" style="max-width: 100%; border-radius: 4px;">
+          </div>
+          <div style="background: #0D1720; border-radius: 8px; padding: 0.5rem; text-align: center;">
+            <div style="font-size: 0.72rem; color: #9BB1C7; font-weight: 600; margin-bottom: 0.3rem;">3. Delineated Contour</div>
+            <img id="reportOverlayImg" src="" alt="Overlay" style="max-width: 100%; border-radius: 4px;">
+          </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 1.2rem;">
+          <thead>
+            <tr style="background: #F1F5F9; text-align: left;">
+              <th style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Diagnostic Metric</th>
+              <th style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">AI Measurement</th>
+              <th style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Clinical Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Primary Predicted Pathology</td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;"><strong id="reportTableClass">--</strong></td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">VGG16 Categorical Softmax</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Classification Certainty</td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;"><strong id="reportTableConf">--</strong></td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Diagnostic Significance &gt;85%</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Estimated Tumor Area</td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;"><strong id="reportTableArea">--</strong></td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Estimated at 1.0mm voxel pitch</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Intracranial Slice Coverage</td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;"><strong id="reportTablePct">--</strong></td>
+              <td style="padding: 0.5rem 0.75rem; border: 1px solid #E2E8F0;">Relative to total intracranial field</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="font-size: 0.75rem; color: #8290A0; line-height: 1.4; border-top: 1px solid #E2E8F0; padding-top: 0.75rem;">
+          <strong>Clinical Decision Support Disclaimer:</strong> This automated report was produced by the NeuroScan AI deep learning inference pipeline (VGG16 &amp; U-Net). It is designed to assist qualified medical practitioners in diagnosis and triage, and should be evaluated alongside patient history and laboratory findings.
+        </div>
       </div>
     </div>
   </div>

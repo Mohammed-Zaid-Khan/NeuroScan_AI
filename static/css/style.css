@@ -1353,22 +1353,58 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg-surface-secondary);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
+  padding: 0.95rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 38, 59, 0.08);
+  border-color: #CBD5E1;
+}
+
+.metric-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  background: rgba(39, 103, 168, 0.08);
+}
+
+.metric-content {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .metric-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .metric-value {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.metric-subtext {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 0.15rem;
 }
 
 .text-indigo { color: var(--color-classification) !important; }
@@ -1711,5 +1747,288 @@ h1, h2, h3, h4, h5, h6 {
     animation: none !important;
     transform: none !important;
     transition: none !important;
+  }
+}
+
+/* ----------------------------------------------------
+   CLINICAL REPORT EXPORT BUTTON
+   ---------------------------------------------------- */
+.btn-report-export {
+  background: linear-gradient(135deg, #1E4E79 0%, #2767A8 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.42rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 6px rgba(39, 103, 168, 0.25);
+}
+
+.btn-report-export:hover {
+  background: linear-gradient(135deg, #2767A8 0%, #3B82F6 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(39, 103, 168, 0.35);
+}
+
+/* ----------------------------------------------------
+   SAMPLE SCANS PANEL & CHIPS
+   ---------------------------------------------------- */
+.sample-scans-panel {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1rem;
+  margin: 1.15rem 0;
+}
+
+.sample-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.75rem;
+}
+
+.sample-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.sample-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sample-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.sample-chip {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.sample-chip:hover {
+  border-color: var(--color-primary);
+  background: #F0F7FF;
+  transform: translateY(-1.5px);
+  box-shadow: 0 3px 8px rgba(39, 103, 168, 0.12);
+}
+
+.sample-chip.active {
+  border-color: var(--color-primary);
+  background: #EBF4FF;
+  box-shadow: 0 0 0 2px rgba(39, 103, 168, 0.25);
+}
+
+.sample-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.cap-indigo {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4F46E5;
+}
+
+.cap-teal {
+  background: rgba(20, 184, 166, 0.15);
+  color: #0D9488;
+}
+
+.cap-blue {
+  background: rgba(39, 103, 168, 0.15);
+  color: #2767A8;
+}
+
+.cap-green {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16A34A;
+}
+
+.sample-chip-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sample-chip-text strong {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
+
+.sample-chip-text span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ----------------------------------------------------
+   INTERACTIVE BEFORE/AFTER SPLIT-CURTAIN SLIDER
+   ---------------------------------------------------- */
+.split-compare-container {
+  background: #0B131E;
+  border-radius: var(--radius-md);
+  border: 1px solid #1E2D3D;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.split-compare-wrapper {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  cursor: ew-resize;
+  background: #060B11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.curtain-img-under {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.curtain-over-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  clip-path: polygon(var(--curtain-split, 50%) 0, 100% 0, 100% 100%, var(--curtain-split, 50%) 100%);
+}
+
+.curtain-img-over {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.curtain-divider-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--curtain-split, 50%);
+  width: 3px;
+  background: #38BDF8;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.75);
+}
+
+.curtain-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  background: #12304A;
+  border: 2px solid #38BDF8;
+  border-radius: 50%;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.curtain-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #9BB1C7;
+  background: #0F1C28;
+  border-top: 1px solid #1E2D3D;
+}
+
+/* ----------------------------------------------------
+   CLINICAL DIAGNOSTIC REPORT MODAL & PRINT STYLING
+   ---------------------------------------------------- */
+.clinical-report-dialog {
+  max-width: 780px !important;
+  width: 95% !important;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #clinicalReportModal,
+  #clinicalReportModal * {
+    visibility: visible;
+  }
+  
+  #clinicalReportModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+  
+  .clinical-report-dialog {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  
+  .modal-header,
+  .modal-close,
+  #btnPrintReport {
+    display: none !important;
   }
 }
