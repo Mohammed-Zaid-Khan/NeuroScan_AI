@@ -18,7 +18,9 @@ from database import (
     record_prediction,
     get_dashboard_analytics,
     get_history_records,
-    log_action
+    log_action,
+    authenticate_user,
+    register_user
 )
 from ml_engine.preprocessing import (
     preprocess_for_classification,
@@ -370,17 +372,131 @@ render_html("""
 
 
 # ----------------------------------------------------
-# 2. APPLICATION STATE (ALWAYS PRE-AUTHENTICATED AS DR. SAPNA)
+# 2. APPLICATION AUTHENTICATION STATE & LOGIN VIEW
 # ----------------------------------------------------
-st.session_state.authenticated = True
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
 
-if "user" not in st.session_state or st.session_state.user is None:
-    st.session_state.user = {
-        "id": 1,
-        "username": "Dr. Sapna",
-        "email": "sapna26@gmail.com",
-        "role": "Doctor/Radiologist"
-    }
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+if not st.session_state.authenticated:
+    # Top minimal brand bar
+    render_html("""
+    <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.65rem 1.2rem; display: flex; align-items: center; justify-content: space-between; height: 52px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); margin-bottom: 2rem;">
+        <span style="font-size: 1.2rem; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">
+            NeuroScan <span style="color: #0284C7;">AI</span>
+        </span>
+        <span style="font-size: 0.8rem; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 0.25rem 0.65rem; border-radius: 9999px;">
+            Secure CDSS v2.4
+        </span>
+    </div>
+    """)
+
+    auth_l, auth_r = st.columns([1.1, 1.2], gap="large")
+    with auth_l:
+        render_html("""
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 2.2rem 1.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); height: 100%;">
+            <div style="display: inline-block; background: #E0F2FE; color: #0369A1; font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.75rem;">
+                Clinical Workspace Access
+            </div>
+            <h1 style="font-size: 1.6rem; font-weight: 800; color: #0F172A; margin: 0 0 0.5rem 0; line-height: 1.25;">
+                AI-Assisted Neuro-Imaging<br><span style="color: #0284C7;">Diagnostic Workspace</span>
+            </h1>
+            <p style="color: #64748B; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.8rem;">
+                MRI classification and pixel-level tumor segmentation powered by VGG16 and deep U-Net neural network architectures.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 2rem;">
+                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                    <span style="background: #EFF6FF; color: #2563EB; font-weight: 700; font-size: 0.72rem; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #BFDBFE;">VGG16</span>
+                    <div>
+                        <strong style="color: #0F172A; font-size: 0.85rem; display: block;">MRI Classification</strong>
+                        <span style="color: #64748B; font-size: 0.78rem;">4-class pathology probability breakdown</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                    <span style="background: #F0FDFA; color: #0D9488; font-weight: 700; font-size: 0.72rem; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #99F6E4;">U-Net</span>
+                    <div>
+                        <strong style="color: #0F172A; font-size: 0.85rem; display: block;">Tumor Segmentation</strong>
+                        <span style="color: #64748B; font-size: 0.78rem;">Pixel-level mask generation & physical area estimation</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                    <span style="background: #F0FDF4; color: #16A34A; font-weight: 700; font-size: 0.72rem; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #BBF7D0;">Secure</span>
+                    <div>
+                        <strong style="color: #0F172A; font-size: 0.85rem; display: block;">Protected Clinical CDSS</strong>
+                        <span style="color: #64748B; font-size: 0.78rem;">Authenticated session access & audit logging</span>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #94A3B8; border-top: 1px solid #E2E8F0; padding-top: 0.75rem;">
+                Reference standard for clinical radiology research and diagnostic assistance.
+            </div>
+        </div>
+        """)
+        
+    with auth_r:
+        render_html("""
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 2.2rem 1.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        """)
+        auth_mode = st.radio("Authentication Action", ["Sign In", "Create Account"], horizontal=True, label_visibility="collapsed")
+        
+        if auth_mode == "Sign In":
+            st.markdown("### Welcome Back")
+            st.caption("Sign in to access your protected diagnostic workstation.")
+            
+            login_user = st.text_input("Email address or Username", placeholder="doctor@hospital.org or Sapna", key="login_id")
+            login_pass = st.text_input("Password", type="password", placeholder="••••••••", key="login_pw")
+            
+            if st.button("Sign In to NeuroScan", use_container_width=True, type="primary", key="btn_signin"):
+                if not login_user or not login_pass:
+                    st.error("Please enter email/username and password.")
+                else:
+                    res = authenticate_user(login_user.strip(), login_pass)
+                    if res["success"]:
+                        st.session_state.authenticated = True
+                        st.session_state.user = res["user"]
+                        st.rerun()
+                    else:
+                        st.error(res.get("message", "Authentication failed. Please verify credentials."))
+            
+            render_html("""
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.85rem 1rem; margin-top: 1.25rem; margin-bottom: 0.5rem;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: #0F172A; margin-bottom: 0.2rem;">Quick Demo Access</div>
+                <div style="font-size: 0.75rem; color: #64748B;">User: <strong>sapna26@gmail.com</strong> · Role: <strong>Doctor/Radiologist</strong></div>
+            </div>
+            """)
+            if st.button("Use Demo Account (Dr. Sapna)", use_container_width=True, key="btn_demo_auth", help="Instant sign in as Dr. Sapna"):
+                res = authenticate_user("sapna26@gmail.com", "Sapna@123")
+                if res["success"]:
+                    st.session_state.authenticated = True
+                    st.session_state.user = res["user"]
+                else:
+                    st.session_state.authenticated = True
+                    st.session_state.user = {"id": 1, "username": "Dr. Sapna", "email": "sapna26@gmail.com", "role": "Doctor/Radiologist"}
+                st.rerun()
+                
+        else:
+            st.markdown("### Create Account")
+            st.caption("Register for a verified clinical workstation seat.")
+            
+            reg_name = st.text_input("Full Name / Username", placeholder="e.g. Dr. Sapna", key="reg_name")
+            reg_role = st.selectbox("Professional Role", ["Doctor/Radiologist", "Researcher/Academic", "Medical Student"], key="reg_role")
+            reg_email = st.text_input("Email address", placeholder="doctor@hospital.org", key="reg_email")
+            reg_pass = st.text_input("Password", type="password", placeholder="••••••••", key="reg_pass")
+            
+            if st.button("Create Account", use_container_width=True, type="primary", key="btn_signup"):
+                if not reg_name or not reg_email or not reg_pass:
+                    st.error("Please fill in all required fields.")
+                else:
+                    res = register_user(reg_name.strip(), reg_email.strip(), reg_pass, role=reg_role)
+                    if res["success"]:
+                        st.success("Account created successfully! Please switch to 'Sign In' tab.")
+                    else:
+                        st.error(res.get("message", "Registration failed."))
+                        
+        render_html("</div>")
+    st.stop()
 
 if "active_nav" not in st.session_state:
     st.session_state.active_nav = "Diagnostic Suite"
@@ -445,13 +561,13 @@ def generate_sample_mri(tumor_type):
 
 
 # ----------------------------------------------------
-# 3. TOP CLINICAL NAVBAR (EXACT LOCALHOST WORKSTATION MATCH)
+# 3. TOP CLINICAL NAVBAR (AUTHENTICATED WORKSTATION)
 # ----------------------------------------------------
 user_obj = st.session_state.user or {"username": "Dr. Sapna", "role": "Doctor/Radiologist"}
 username_display = user_obj.get("username", "Dr. Sapna")
 initials_display = "".join([p[0] for p in username_display.split() if p])[:2].upper() or "DS"
 
-nav_col1, nav_col2, nav_col3 = st.columns([3.0, 3.8, 3.2], gap="medium")
+nav_col1, nav_col2, nav_col3 = st.columns([2.5, 3.8, 3.7], gap="medium")
 
 with nav_col1:
     render_html("""
@@ -478,18 +594,26 @@ with nav_col2:
     )
 
 with nav_col3:
-    render_html(f"""
-    <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.65rem 1.2rem; display: flex; align-items: center; justify-content: flex-end; gap: 0.85rem; height: 52px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
-        <div class="status-badge-live">
-            <span class="status-dot-pulse"></span>
-            <span>Engines Online</span>
+    n3_info, n3_out = st.columns([2.2, 1.0], gap="small")
+    with n3_info:
+        render_html(f"""
+        <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.65rem 0.9rem; display: flex; align-items: center; justify-content: flex-end; gap: 0.65rem; height: 52px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+            <div class="status-badge-live">
+                <span class="status-dot-pulse"></span>
+                <span>Online</span>
+            </div>
+            <div class="profile-chip">
+                <span class="avatar-icon-circle">{initials_display}</span>
+                <span>{username_display}</span>
+            </div>
         </div>
-        <div class="profile-chip">
-            <span class="avatar-icon-circle">{initials_display}</span>
-            <span>{username_display}</span>
-        </div>
-    </div>
-    """)
+        """)
+    with n3_out:
+        if st.button("Logout", key="btn_navbar_logout", use_container_width=True, help="Sign out of NeuroScan AI"):
+            st.session_state.authenticated = False
+            st.session_state.user = None
+            st.session_state.analysis_results = None
+            st.rerun()
 
 st.write("")
 
