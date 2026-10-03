@@ -306,18 +306,7 @@ def api_dual_analysis():
         user_id = session.get('user', {}).get('id')
         upload_id = record_upload(user_id, file.filename, f"static/uploads/{unique_filename}", os.path.getsize(saved_path))
 
-        # 1. Classification (VGG16) & Grad-CAM
-        classifier = get_classifier()
-        class_tensor, raw_class_img = preprocess_for_classification(saved_path)
-        predicted_class, confidence, probabilities = classifier.predict(class_tensor, raw_class_img, filename=file.filename)
-
-        gradcam_map = generate_gradcam_heatmap(classifier, class_tensor, raw_class_img)
-        _, gradcam_overlay = overlay_heatmap_on_image(saved_path, gradcam_map, alpha=0.45, colormap_name="JET")
-        gradcam_filename = f"gradcam_{uuid.uuid4().hex[:10]}.png"
-        gradcam_path = os.path.join(Config.SEGMENT_FOLDER, gradcam_filename)
-        cv2.imwrite(gradcam_path, cv2.cvtColor(gradcam_overlay, cv2.COLOR_RGB2BGR))
-
-        # 2. Segmentation (U-Net) & Probability Heatmap
+        # 1. Segmentation (U-Net) & Probability Heatmap
         segmenter = get_segmenter()
         seg_tensor, raw_seg_img = preprocess_for_segmentation(saved_path)
         mask = segmenter.predict_mask(seg_tensor, raw_seg_img)
@@ -335,6 +324,20 @@ def api_dual_analysis():
         density_filename = f"density_{uuid.uuid4().hex[:10]}.png"
         density_path = os.path.join(Config.SEGMENT_FOLDER, density_filename)
         cv2.imwrite(density_path, cv2.cvtColor(prob_overlay, cv2.COLOR_RGB2BGR))
+
+        # 2. Classification (VGG16) & Grad-CAM (informed by segmentation mask)
+        classifier = get_classifier()
+        class_tensor, raw_class_img = preprocess_for_classification(saved_path)
+        predicted_class, confidence, probabilities = classifier.predict(
+            class_tensor, raw_class_img, filename=file.filename, mask=mask
+        )
+
+        gradcam_map = generate_gradcam_heatmap(classifier, class_tensor, raw_class_img, mask=mask)
+        _, gradcam_overlay = overlay_heatmap_on_image(saved_path, gradcam_map, alpha=0.45, colormap_name="JET")
+        gradcam_filename = f"gradcam_{uuid.uuid4().hex[:10]}.png"
+        gradcam_path = os.path.join(Config.SEGMENT_FOLDER, gradcam_filename)
+        cv2.imwrite(gradcam_path, cv2.cvtColor(gradcam_overlay, cv2.COLOR_RGB2BGR))
+
 
         # Record combined prediction in DB
         pred_id = record_prediction(

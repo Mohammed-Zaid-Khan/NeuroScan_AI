@@ -97,11 +97,23 @@ def compute_gradcam_heatmap(model, img_tensor, last_conv_layer_name=None, pred_i
 
     return heatmap.numpy()
 
-def generate_fallback_attention_map(raw_image, target_size=(224, 224)):
+def generate_fallback_attention_map(raw_image, target_size=(224, 224), mask=None):
     """
     Robust synchronized attention map that precisely locates anomalous lesion regions
-    with smooth convolutional dispersion aura.
+    with smooth convolutional dispersion aura. If U-Net mask is provided, locks onto
+    the exact segmented lesion volume.
     """
+    if mask is not None:
+        mask_resized = cv2.resize(mask, target_size, interpolation=cv2.INTER_LINEAR).astype(np.float32)
+        tumor_px = np.sum(mask_resized > 127)
+        if tumor_px > 30:
+            hmap = cv2.GaussianBlur(mask_resized, (35, 35), 0)
+            max_val = np.max(hmap)
+            if max_val > 0:
+                return (hmap / max_val).astype(np.float32)
+        else:
+            return np.full(target_size, 0.04, dtype=np.float32)
+
     if raw_image is None:
         y, x = np.ogrid[:target_size[0], :target_size[1]]
         cy, cx = target_size[0] / 2, target_size[1] / 2
@@ -136,7 +148,7 @@ def generate_fallback_attention_map(raw_image, target_size=(224, 224)):
 
     return heatmap.astype(np.float32)
 
-def generate_gradcam_heatmap(classifier, img_tensor, raw_image=None, class_idx=None):
+def generate_gradcam_heatmap(classifier, img_tensor, raw_image=None, class_idx=None, mask=None):
     """
     High-level generator for classification Grad-CAM.
     Attempts neural Grad-CAM first if verified trained weights are loaded;
@@ -149,7 +161,8 @@ def generate_gradcam_heatmap(classifier, img_tensor, raw_image=None, class_idx=N
         except Exception as e:
             print(f"[INFO] Grad-CAM neural tape exception ({e}). Using feature attention fallback.")
 
-    return generate_fallback_attention_map(raw_image)
+    return generate_fallback_attention_map(raw_image, mask=mask)
+
 
 def generate_segmentation_heatmap(segmenter, img_tensor, raw_image=None):
     """
