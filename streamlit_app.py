@@ -107,63 +107,63 @@ render_html("""
         padding-right: 2rem !important;
     }
 
-    /* TOP CLINICAL NAVBAR (DEEP NAVY SLATE #0F172A) */
+    /* TOP CLINICAL NAVBAR (CLEAN LIGHT THEME) */
     .clinical-navbar-wrapper {
-        background-color: #0F172A;
+        background-color: #FFFFFF;
+        border: 1px solid #E2E8F0;
         border-radius: 10px;
         padding: 0.75rem 1.4rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.25rem;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
     .clinical-navbar-wrapper * {
-        color: #FFFFFF !important;
+        color: #0F172A !important;
     }
     .nav-brand-title {
         font-size: 1.25rem;
-        font-weight: 700;
+        font-weight: 800;
         letter-spacing: -0.02em;
         display: flex;
         align-items: center;
-        gap: 0.65rem;
-        color: #FFFFFF !important;
+        color: #0F172A !important;
     }
     .brand-accent {
-        color: #0EA5E9 !important;
+        color: #0284C7 !important;
         font-weight: 800;
     }
     .status-badge-live {
         display: inline-flex;
         align-items: center;
         gap: 0.45rem;
-        background: rgba(14, 165, 233, 0.15);
-        color: #38BDF8 !important;
+        background: #ECFDF5;
+        color: #059669 !important;
         padding: 0.3rem 0.75rem;
         border-radius: 9999px;
         font-size: 0.8rem;
         font-weight: 600;
-        border: 1px solid rgba(56, 189, 248, 0.35);
+        border: 1px solid #A7F3D0;
     }
     .status-dot-pulse {
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background-color: #38BDF8;
-        box-shadow: 0 0 8px #38BDF8;
+        background-color: #10B981;
+        box-shadow: 0 0 6px #10B981;
     }
     .profile-chip {
         display: inline-flex;
         align-items: center;
         gap: 0.55rem;
-        background: rgba(255, 255, 255, 0.1);
+        background: #F8FAFC;
         padding: 0.3rem 0.8rem;
         border-radius: 9999px;
         font-size: 0.84rem;
         font-weight: 600;
-        color: #FFFFFF !important;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #0F172A !important;
+        border: 1px solid #E2E8F0;
     }
     .avatar-icon-circle {
         width: 22px;
@@ -455,18 +455,10 @@ nav_col1, nav_col2, nav_col3 = st.columns([3.0, 3.8, 3.2], gap="medium")
 
 with nav_col1:
     render_html("""
-    <div style="background-color: #12304A; border-radius: 12px; padding: 0.65rem 1.2rem; display: flex; align-items: center; height: 52px; box-shadow: 0 4px 16px rgba(13, 38, 59, 0.12);">
-        <div class="nav-brand-title">
-            <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="32" height="32" rx="8" fill="#2767A8"/>
-                <path d="M16 6C10.5 6 7 9.8 7 14.5C7 18 8.8 21 11.5 23.5V26H20.5V23.5C23.2 21 25 18 25 14.5C25 9.8 21.5 6 16 6Z" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 12H22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
-                <path d="M9 16H23" stroke="#64B5F6" stroke-width="1.8" stroke-linecap="round"/>
-                <path d="M11 20H21" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
-                <circle cx="18.5" cy="14.5" r="2" fill="#168C88" stroke="#FFFFFF" stroke-width="1"/>
-            </svg>
-            <span>NeuroScan <strong class="brand-accent">AI</strong></span>
-        </div>
+    <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.65rem 1.2rem; display: flex; align-items: center; height: 52px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
+        <span style="font-size: 1.2rem; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">
+            NeuroScan <span style="color: #0284C7;">AI</span>
+        </span>
     </div>
     """)
 
@@ -487,7 +479,7 @@ with nav_col2:
 
 with nav_col3:
     render_html(f"""
-    <div style="background-color: #0F172A; border-radius: 12px; padding: 0.65rem 1.2rem; display: flex; align-items: center; justify-content: flex-end; gap: 0.85rem; height: 52px; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12); border: 1px solid #1E293B;">
+    <div style="background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 0.65rem 1.2rem; display: flex; align-items: center; justify-content: flex-end; gap: 0.85rem; height: 52px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
         <div class="status-badge-live">
             <span class="status-dot-pulse"></span>
             <span>Engines Online</span>
