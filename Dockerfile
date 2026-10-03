@@ -13,7 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Hugging Face Spaces exposes port 7860
-EXPOSE 7860
+# Expose common web ports
+EXPOSE 7860 8080 5000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:7860", "--workers", "1", "--threads", "4", "app:app"]
+# Bind dynamically to Railway's $PORT or fallback to 7860
+CMD exec gunicorn --bind 0.0.0.0:${PORT:-7860} --workers 1 --threads 4 --timeout 120 app:app
